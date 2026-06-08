@@ -1,2536 +1,1609 @@
 import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 
-// ─── Quick Review markdown ────────────────────────────────────────────────────
-const quickReviewMD = `# ⚛️ React — Quick Review Notes
-> Cover all 30 topics. Read in ~10 min.
-
----
-
-## 🟢 BASICS (Topics 1–9)
-
-### 1. What is React & SPA
-- React is a UI library. Page **never fully reloads** — only components swap. This is called an **SPA (Single Page Application)**.
-- Benefit: **Reusability** — write \`<Card/>\` once, use it 100 times.
-
-### 2. Component
-- A **reusable UI code block**. Just a JS function that returns JSX.
-- Example: \`<Header/>\`, \`<Card/>\`, \`<Sidebar/>\`
-- Rules: name must start with **Capital letter**. Must **return JSX**.
-
-### 3. JSX
-- **HTML-like syntax** written inside JavaScript.
-- Uses \`{}\` to embed any JS expression: \`<p>{name}</p>\`
-- Use \`className\` not \`class\`. Self-close tags: \`<img />\`.
-
-### 4. Props
-- Used to make components **dynamic**.
-- Props = **object** passed from parent to child: \`<Card title="Hi" age={22} />\`
-- Inside child: \`function Card({ title, age }) {}\`
-- Props are **read-only** — never modify them.
-
-### 5. useState
-- Stores **state-changing data** inside a component.
-- \`const [count, setCount] = useState(0)\`
-- Always use the **setter** to update: \`setCount(count + 1)\`
-- Can store anything: number, string, boolean, array, object.
-
-### 6. Events
-- Run a function when the user **does something**.
-- Always **camelCase**: \`onClick\`, \`onChange\`, \`onSubmit\`
-- Always **pass the function**, never call it: \`onClick={handleClick}\` ✅ NOT \`onClick={handleClick()}\` ❌
-
-### 7. Conditional Rendering
-- Show UI **based on a condition**.
-- \`? :\` → two choices (if / else)
-- \`&&\` → show or hide (if only)
-
-### 8. List / Map
-- Render **multiple items** using \`.map()\`:
-  \`users.map(u => <p key={u.id}>{u.name}</p>)\`
-- Every list item **needs a key** — use a unique id, not index.
-- Key helps React **track** what changed.
-
-### 9. Styling
-- \`className="box"\` → external CSS file
-- Inline style uses a JS **object**: \`style={{ color: "red", fontSize: 16 }}\`
-- camelCase for CSS properties: \`backgroundColor\`, not \`background-color\`.
+// ─── Quick Review Markdown ─────────────────────────────────────────────────────
+const quickReviewMD = `# 🚂 Express.js — Quick Review Notes
+> Cover all topics. Read in ~10 min.
 
 ---
 
-## 🟡 INTERMEDIATE (Topics 10–18)
+## 🟢 BASICS (Topics 1–6)
 
-### 10. useEffect
-- Run **side effects** (fetch, timer, DOM changes) in a controlled way.
-- \`useEffect(() => {}, [])\` → runs **once** on mount
-- \`useEffect(() => {}, [x])\` → runs on mount **+ when x changes**
-- \`useEffect(() => {})\` → runs on **every render** (usually avoid)
-- Return a cleanup function to cancel timers/listeners on unmount.
+### 1. What is Express.js
+- Express is a **minimal Node.js web framework** for building servers and APIs.
+- Node.js handles the runtime, Express gives you **routing + middleware** on top.
+- Install: \`npm init -y\` then \`npm install express\`
 
-### 11. Forms (Controlled Components)
-- Input **controlled by React state**: \`value={text} onChange={(e) => setText(e.target.value)}\`
-- Input goes → React reads it → React updates state → React re-renders input.
-- Use \`e.preventDefault()\` on submit to stop page reload.
-- One handler for all fields using \`e.target.name\`.
+### 2. Creating a Server
+- \`const app = express()\` → creates the app.
+- \`app.listen(3000, () => {})\` → starts the server on port 3000.
+- Every request goes through middleware + a matching route handler.
 
-### 12. Lifting State Up
-- If the **same data** is needed by multiple components → move state to their **common parent**.
-- Parent holds useState, passes state + setter down as props.
-- Children call the setter (passed as prop) to update parent state.
+### 3. Routing
+- \`app.get('/path', handler)\` → respond to GET requests.
+- \`app.post / .put / .delete / .patch\` → other HTTP methods.
+- Handler receives \`(req, res)\` — req = request info, res = send a response.
 
-### 13. Composition
-- **Component inside component** — build complex UI from simple pieces.
-- \`props.children\` = whatever is between the opening and closing tags.
-- Example: \`<Card><p>anything here</p></Card>\`
+### 4. Request Object (req)
+- \`req.params\` → URL params like \`/users/:id\` → \`req.params.id\`
+- \`req.query\` → query string like \`?name=dev\` → \`req.query.name\`
+- \`req.body\` → request body (needs middleware: \`express.json()\`)
 
-### 14. React Router
-- Changes **page without reload**. Install: \`npm install react-router-dom\`
-- \`<BrowserRouter>\` wraps the whole app.
-- \`<Link to="/about">\` — changes URL on click (no reload).
-- \`<Routes><Route path="/about" element={<About/>}/></Routes>\` — Router checks path → renders matching component.
-- \`useNavigate()\` → navigate programmatically. \`useParams()\` → read URL params.
+### 5. Response Object (res)
+- \`res.send('text')\` → send text.
+- \`res.json({ key: value })\` → send JSON.
+- \`res.status(404).json({ error: 'Not found' })\` → send with status code.
 
-### 15. useRef
-- **Direct connection/reference** to a DOM element or any value.
-- Unlike state: changing ref does **NOT re-render** the component.
-- \`const x = useRef(null)\` → \`<input ref={x}/>\` → access via \`x.current.value\`
-- Also used to store interval IDs, previous values — anything without triggering re-render.
-
-### 16. useContext
-- **Share data without prop drilling** — pass data to any component without threading props through every level.
-- Steps: \`createContext()\` → wrap in \`<Context.Provider value={...}>\` → read with \`useContext(Context)\` anywhere inside.
-- Think of it as a **pipeline** — data flows directly from provider to any consumer.
-
-### 17. Custom Hooks
-- A **function with name starting with \`use\`** that contains custom logic using other hooks.
-- Lets you **reuse stateful logic** across components.
-- Each component gets its own **independent copy** of the state.
-- Example: \`useFetch\`, \`useToggle\`, \`useWindowSize\`
-
-### 18. Error Boundary
-- **Catches render errors** in child components and shows a fallback UI instead of crashing the whole app.
-- Like try/catch but for React rendering.
-- Must be a **class component** with \`getDerivedStateFromError()\` and \`componentDidCatch()\`.
-- Wrap risky sections: \`<ErrorBoundary><BuggyComponent/></ErrorBoundary>\`
+### 6. Middleware
+- Functions that run **between the request and the route handler**.
+- Signature: \`(req, res, next) => {}\` — must call \`next()\` to continue.
+- \`app.use()\` → registers middleware globally or per path.
 
 ---
 
-## 🔴 ADVANCED (Topics 19–30)
+## 🟡 INTERMEDIATE (Topics 7–12)
 
-### 19. useReducer
-- Alternative to useState for **complex state logic**.
-- \`const [state, dispatch] = useReducer(reducer, initialState)\`
-- You **dispatch actions** → reducer function decides how state changes.
-- Action = plain object with a \`type\` field: \`dispatch({ type: "INCREMENT" })\`
-- Use when state has multiple values or complex update logic.
+### 7. express.json() & express.urlencoded()
+- Built-in middleware. Parses JSON body → available as \`req.body\`.
+- Must be registered before any route that reads \`req.body\`.
 
-### 20. useMemo & useCallback
-- **useMemo** — caches result of expensive calculation. Recalculates only when deps change.
-  \`const result = useMemo(() => heavyCalc(x), [x])\`
-- **useCallback** — caches a **function reference** so it doesn't get recreated every render.
-  \`const fn = useCallback(() => doSomething(), [dep])\`
-- Only use when you've identified a real performance problem.
+### 8. Express Router
+- \`express.Router()\` → creates a mini-app for organizing routes.
+- Define routes on the router, mount with \`app.use('/prefix', router)\`.
+- Keeps code modular — one file per resource (users, posts, products).
 
-### 21. React.memo
-- Wraps a component — **skips re-render** if props didn't change.
-- \`const MemoChild = React.memo(ChildComponent)\`
-- Shallow comparison of props. Pair with \`useCallback\` for function props to work correctly.
+### 9. Error Handling Middleware
+- 4-argument middleware: \`(err, req, res, next)\` — Express detects this automatically.
+- Place at the end of all middleware/routes.
+- Call \`next(err)\` from any route to jump to error handler.
 
-### 22. Code Splitting & Lazy Loading
-- Split the bundle — load component code **only when needed**.
-- \`const Page = lazy(() => import('./Page'))\`
-- Wrap in \`<Suspense fallback={<Spinner/>}>\` to show loader while loading.
-- Best used at **route level** — load each page's code only when user visits it.
+### 10. Static Files
+- \`app.use(express.static('public'))\` → serve files from the public folder.
+- Files like images, CSS, HTML served automatically without a route.
 
-### 23. Portals
-- Render a component **outside the parent DOM node** (e.g. directly in \`document.body\`).
-- \`createPortal(children, document.body)\` from \`react-dom\`
-- Used for modals, tooltips, dropdowns — so parent CSS can't clip them.
-- Events still bubble through the **React tree** normally.
+### 11. Environment Variables
+- Store secrets in \`.env\`. Load with \`npm install dotenv\` → \`require('dotenv').config()\`.
+- Access as \`process.env.PORT\`, \`process.env.DB_URL\`, etc.
 
-### 24. Compound Components
-- Group of components that **share implicit state** via Context — no prop drilling.
-- Parent holds state, sub-components consume it via Context.
-- Sub-components attached as properties: \`Tabs.Tab\`, \`Tabs.Panel\`
-- Consumer has full control over structure and layout.
-
-### 25. Render Props
-- Share logic via a **prop that is a function**.
-- \`<Tracker render={(data) => <UI data={data}/>}/>\`
-- Component calls the function and passes internal state to it.
-- Mostly replaced by **custom hooks** today — hooks are simpler.
-
-### 26. State Management (Zustand / Redux Toolkit)
-- For **global state** that many components need — better than Context for complex apps.
-- **Zustand** — \`npm install zustand\`. Create store with \`create()\`, use anywhere with a hook. No Provider needed.
-- **Redux Toolkit** — \`npm install @reduxjs/toolkit react-redux\`. \`createSlice()\` + \`configureStore()\`. Wrap app in \`<Provider>\`.
-- New projects → Zustand. Large existing Redux apps → Redux Toolkit.
-
-### 27. Data Fetching (TanStack Query)
-- \`npm install @tanstack/react-query\`
-- Handles: **caching, loading, error, background refetch** — all automatically.
-- \`useQuery({ queryKey: ['user'], queryFn: fetchUser })\` → returns \`{ data, isLoading, error }\`
-- \`useMutation()\` for POST/PUT/DELETE operations.
-- Much better than manually writing useEffect + useState for every fetch.
-
-### 28. TypeScript with React
-- Adds **static types** — catch errors before runtime.
-- \`npm create vite@latest my-app -- --template react-ts\`
-- Type props: \`interface Props { name: string; age?: number }\`
-- Type state: \`useState<User | null>(null)\`
-- Type events: \`React.ChangeEvent<HTMLInputElement>\`
-
-### 29. Testing
-- \`npm install --save-dev @testing-library/react @testing-library/jest-dom\`
-- \`render(<Component/>)\` → renders into virtual DOM.
-- Find elements: \`screen.getByText()\`, \`screen.getByRole()\`
-- Simulate: \`userEvent.click()\`, \`userEvent.type()\`
-- Assert: \`expect(el).toBeInTheDocument()\`
-- Test what the **user sees and does**, not internal implementation.
-
-### 30. Next.js
-- \`npx create-next-app@latest my-app\`
-- React **framework** — adds SSR, file-based routing, API routes on top of React.
-- File \`app/about/page.jsx\` → route \`/about\` — no router config needed.
-- **Server Components** (default) — run on server, fetch data directly, zero JS to browser.
-- **Client Components** — add \`"use client"\` at top — needed for useState, events.
-- \`<Link>\` for navigation. \`next/image\` for optimized images. \`app/api/route.js\` for API endpoints.
+### 12. CORS
+- Install: \`npm install cors\`. Use: \`app.use(cors())\`.
+- Allows your API to be called from a different origin (e.g., React frontend).
 
 ---
 
-## 📌 IMPORTANT THEORY (from your notes)
+## 🔴 ADVANCED (Topics 13–18)
 
-| Concept | Meaning |
-|---|---|
-| **Virtual DOM** | React uses a lightweight copy of the DOM. useState, useRef, useEffect all use VDom. React tracks changes, updates only what changed. |
-| **Re-render** | Component function runs again when useState/useRef/useEffect changes trigger it. |
-| **Hooks** | Concepts like useState, useEffect etc. Only usable inside component functions. Give components: memory, side-effect control, lifecycle. |
-| **Fragment** | \`<> </>\` — return multiple elements without adding an extra \`<div>\` to the DOM. |
-| **Controlled Component** | Input controlled by React state. \`value={text}\` — React owns the value. |
-| **Prop Drilling** | Passing props through many layers just to reach a deep child. Solution: useContext. |
-| **Callback** | A function passed as an argument to another function. e.g. \`<Button onClick={hello}/>\` |
-| **State vs Props** | State = internal data the component owns. Props = external data passed from parent. |
-| **Mount** | Component renders for the first time. Page opens → component renders → mounted. |
-| **Unmount** | Component is removed. Page change, condition becomes false → component unmounts. |
+### 13. REST API Design
+- GET /users → list. GET /users/:id → single. POST /users → create.
+- PUT /users/:id → replace. PATCH /users/:id → partial update. DELETE /users/:id → delete.
+- Always return appropriate status codes: 200, 201, 400, 404, 500.
+
+### 14. Async Route Handlers
+- Use \`async/await\` inside route handlers for database calls.
+- Wrap in try/catch or use a wrapper function to forward errors to \`next(err)\`.
+
+### 15. Authentication (JWT)
+- \`npm install jsonwebtoken bcryptjs\`.
+- On login: verify password → sign a JWT → send to client.
+- Protected routes: read JWT from Authorization header → verify → allow or 401.
+
+### 16. Connecting to MongoDB (Mongoose)
+- \`npm install mongoose\`. Connect with \`mongoose.connect(process.env.MONGO_URI)\`.
+- Define a Schema → create a Model → use Model.find(), .create(), .findById(), etc.
+
+### 17. Input Validation
+- \`npm install express-validator\`. Chain validation rules on route, run \`validationResult(req)\`.
+- Always validate on the server — never trust client input.
+
+### 18. Deployment
+- Set \`PORT = process.env.PORT || 3000\` (hosting platforms set PORT automatically).
+- Deploy to Railway, Render, or Heroku. Use \`npm start\` script in package.json.
+- Never commit .env — use platform environment variable settings.
 
 ---
 
-*Topics 1–18 = your notes ✅ | Topics 19–30 = add these to your review ⚠️*
+*Topics 1–18 = everything you need to build production Express APIs ✅*
 `;
 
-// ─── Topics 1–9 data ─────────────────────────────────────────────────────────
-const topics = [
+// ─── Topics 1–6: Basics ───────────────────────────────────────────────────────
+const topicsBasic = [
   {
     id: 1,
-    emoji: "⚛️",
-    title: "What is React & Why It Exists",
+    emoji: "🚂",
+    title: "What is Express.js & Why Use It",
     color: "#61DAFB",
     theory: [
-      "React is a JavaScript library (not a framework) for building user interfaces.",
-      "Before React, every time data changed, the whole HTML page had to re-render — slow and messy.",
-      "React introduced the Virtual DOM: a lightweight copy of the real DOM. When data changes, React updates only the parts that actually changed.",
-      "Think of it like this: instead of repainting the whole wall, React only repaints the scratch.",
+      "Express.js is a minimal, unopinionated web framework for Node.js. Node.js can handle HTTP on its own, but Express makes it dramatically easier with routing, middleware, and helper methods.",
+      "Without Express, you'd write low-level Node.js http.createServer() code — parsing URLs, methods, and bodies manually for every request. Express abstracts all of that.",
+      "Express is the most popular Node.js framework. When people say 'build a backend with Node', they almost always mean Node + Express.",
+      "Express is used to build REST APIs, web servers, and full-stack apps (with a template engine like EJS). It can serve JSON to a React frontend or render HTML pages directly.",
+      "The MERN stack (MongoDB, Express, React, Node) is one of the most popular full-stack setups — Express is the 'E'.",
     ],
     notes: [
-      "React was made by Facebook (Meta) in 2013.",
-      "React is just the UI layer — it doesn't care about routing, data fetching, etc. (you add those separately).",
-      "Virtual DOM → React figures out what changed → updates only that in the real DOM. This is called Reconciliation.",
+      "Install: npm init -y → npm install express",
+      "Express sits on top of Node.js — it doesn't replace it, it enhances it.",
+      "Unopinionated means Express doesn't force a folder structure or patterns — you decide.",
+      "Popular alternatives: Fastify (faster), Koa (same team, modern async), NestJS (opinionated, TypeScript).",
+      "Express is minimal — you add what you need: cors, helmet, morgan, dotenv, etc.",
+      "Version 4.x is the current stable version. Express 5 is in beta with better async error handling.",
     ],
-    code: `// Without React (vanilla JS — painful):
-document.getElementById("name").innerHTML = "Devendra";
+    code: `// 1. Install:
+// npm init -y
+// npm install express
 
-// With React — you just describe WHAT the UI should look like,
-// React figures out HOW to update the DOM.
-function App() {
-  return <h1>Hello, Devendra!</h1>;
-}`,
+// 2. Basic server — server.js
+const express = require('express');
+const app = express();
+
+// 3. Register a route
+app.get('/', (req, res) => {
+  res.send('Hello from Express!');
+});
+
+// 4. Start the server
+app.listen(3000, () => {
+  console.log('Server running at http://localhost:3000');
+});
+
+// Run it:
+// node server.js  → OR  npm install -D nodemon → npx nodemon server.js
+
+// Folder structure for a typical Express API:
+// my-api/
+// ├── server.js         ← entry point
+// ├── routes/
+// │   ├── users.js      ← user routes
+// │   └── posts.js      ← post routes
+// ├── controllers/      ← route logic
+// ├── models/           ← DB models
+// ├── middleware/       ← custom middleware
+// ├── .env              ← secrets (never commit)
+// └── package.json`,
   },
   {
     id: 2,
-    emoji: "📝",
-    title: "JSX",
+    emoji: "🛣️",
+    title: "Routing",
     color: "#F7DF1E",
     theory: [
-      "JSX = JavaScript XML. It lets you write HTML-like syntax directly inside JavaScript.",
-      "JSX is NOT HTML. It looks like HTML but gets compiled to regular JavaScript by a tool called Babel.",
-      "Every JSX element compiles down to React.createElement() calls under the hood.",
+      "Routing means defining which code runs when a specific URL + HTTP method combination is hit. In Express, you define routes with app.get(), app.post(), app.put(), app.delete(), etc.",
+      "Each route handler receives two objects: req (the incoming request) and res (the outgoing response). You read from req and write to res.",
+      "Route paths can be exact strings ('/users'), strings with parameters ('/users/:id'), or regular expressions. Express matches routes in the order they are defined.",
+      "app.route('/path').get(fn).post(fn) lets you chain handlers for the same path — keeping code DRY.",
+      "app.all('/path', fn) matches any HTTP method — useful for middleware applied to one route.",
     ],
     notes: [
-      "Use className instead of class (because class is a reserved JS keyword).",
-      "Use htmlFor instead of for (same reason).",
-      "Every JSX expression must return ONE parent element. Wrap in a <div> or empty <> fragment if needed.",
-      "JavaScript expressions inside JSX go in curly braces {}.",
-      "Self-closing tags must have a slash: <img /> not <img>.",
+      "GET → read data. POST → create. PUT → replace. PATCH → partial update. DELETE → delete.",
+      "Routes are matched top to bottom — order matters. Put specific routes before wildcard ones.",
+      "Route parameters use colon syntax: /users/:id → req.params.id",
+      "You can have multiple handlers per route: app.get('/path', middleware, handler)",
+      "res.send() ends the response. If you forget it, the request hangs forever.",
+      "Every route handler MUST send a response — either res.send(), res.json(), res.redirect(), or res.end().",
     ],
-    code: `// JSX example
-function App() {
-  const name = "Devendra";
-  const age = 22;
+    code: `const express = require('express');
+const app = express();
 
-  return (
-    <>
-      <h1 className="title">Hello, {name}!</h1>
-      <p>Age: {age}</p>
-      <p>In 5 years: {age + 5}</p>
-      <img src="photo.jpg" alt="profile" />
-    </>
-  );
-}
+// GET /
+app.get('/', (req, res) => {
+  res.send('Home page');
+});
 
-// What JSX compiles to (you never write this manually):
-// React.createElement("h1", { className: "title" }, "Hello, Devendra!")`,
+// GET /about
+app.get('/about', (req, res) => {
+  res.send('About page');
+});
+
+// Route parameter — :id is dynamic
+// GET /users/42 → req.params.id = '42'
+app.get('/users/:id', (req, res) => {
+  const { id } = req.params;
+  res.json({ message: \`User ID: \${id}\` });
+});
+
+// Multiple params
+// GET /posts/5/comments/3
+app.get('/posts/:postId/comments/:commentId', (req, res) => {
+  const { postId, commentId } = req.params;
+  res.json({ postId, commentId });
+});
+
+// Chained handlers on the same path
+app.route('/products')
+  .get((req, res)  => res.json({ action: 'list all products' }))
+  .post((req, res) => res.json({ action: 'create product' }));
+
+app.listen(3000);`,
   },
   {
     id: 3,
-    emoji: "🧩",
-    title: "Components",
+    emoji: "📥",
+    title: "Request Object (req)",
     color: "#FF6B6B",
     theory: [
-      "A component is just a JavaScript function that returns JSX.",
-      "Components are the building blocks of React apps — like LEGO pieces you combine together.",
-      "Think of a webpage: Header, Sidebar, Card, Footer — each is a component.",
-      "Components can be reused anywhere in your app. Write once, use many times.",
+      "The req (request) object contains everything about the incoming HTTP request — the URL, method, headers, body, and more.",
+      "req.params holds dynamic route segments: for route /users/:id, a request to /users/42 gives req.params.id = '42'.",
+      "req.query holds query string parameters: a request to /search?q=express&limit=10 gives req.query.q = 'express' and req.query.limit = '10'.",
+      "req.body holds the parsed request body. It's only populated after adding body-parsing middleware like express.json().",
+      "req.headers holds all HTTP headers. req.get('Authorization') is a shorthand for reading a specific header.",
     ],
     notes: [
-      "Component names MUST start with a capital letter. <button> is an HTML tag, <Button> is your component.",
-      "Keep components small and focused — one component should do one thing.",
-      "Components can be nested inside other components.",
-      "The top-level component is usually called App.",
+      "req.params → URL path segments like :id. Always strings — convert with Number() if needed.",
+      "req.query → query string after ?. Also always strings.",
+      "req.body → POST/PUT/PATCH body. Requires express.json() or express.urlencoded() middleware first.",
+      "req.method → 'GET', 'POST', etc. req.url → the full URL string.",
+      "req.headers → all headers as an object. req.get('Content-Type') → specific header.",
+      "req.cookies → parsed cookies (needs cookie-parser middleware).",
+      "req.ip → client's IP address. req.path → path without query string.",
     ],
-    code: `// A simple component
-function Greeting() {
-  return <h2>Hello from Greeting component!</h2>;
-}
+    code: `const express = require('express');
+const app = express();
+app.use(express.json()); // needed to parse req.body
 
-// A reusable Card component
-function Card() {
-  return (
-    <div className="card">
-      <h3>Card Title</h3>
-      <p>Some content here.</p>
-    </div>
-  );
-}
+// ── req.params ──────────────────────────────
+// Route: /users/:id
+// Request: GET /users/42
+app.get('/users/:id', (req, res) => {
+  console.log(req.params);  // { id: '42' }
+  console.log(req.params.id); // '42'
+  res.json({ userId: Number(req.params.id) });
+});
 
-// App uses both — components nest inside components
-function App() {
-  return (
-    <div>
-      <Greeting />
-      <Card />
-      <Card />  {/* reused! */}
-    </div>
-  );
-}`,
+// ── req.query ───────────────────────────────
+// Request: GET /search?q=express&limit=5&page=2
+app.get('/search', (req, res) => {
+  console.log(req.query);         // { q: 'express', limit: '5', page: '2' }
+  const { q, limit = 10, page = 1 } = req.query;
+  res.json({ query: q, limit: Number(limit), page: Number(page) });
+});
+
+// ── req.body ────────────────────────────────
+// Request: POST /users with JSON body { "name": "Dev", "email": "dev@test.com" }
+app.post('/users', (req, res) => {
+  console.log(req.body);          // { name: 'Dev', email: 'dev@test.com' }
+  const { name, email } = req.body;
+  res.status(201).json({ created: { name, email } });
+});
+
+// ── req.headers ─────────────────────────────
+app.get('/protected', (req, res) => {
+  const token = req.get('Authorization'); // or req.headers.authorization
+  console.log(token); // 'Bearer abc123...'
+  res.json({ token });
+});
+
+app.listen(3000);`,
   },
   {
     id: 4,
-    emoji: "📦",
-    title: "Props",
+    emoji: "📤",
+    title: "Response Object (res)",
     color: "#A78BFA",
     theory: [
-      "Props (short for properties) are how you pass data from a parent component to a child component.",
-      "Props flow in ONE direction only: parent → child. Never the other way.",
-      "Props make components reusable — the same component can render different content based on props.",
-      "Think of props like arguments to a function — you pass them in, the component uses them.",
+      "The res (response) object is how you send data back to the client. Express adds many helper methods on top of Node's raw response.",
+      "res.send() sends text, HTML, or a Buffer. res.json() serializes a JavaScript object to JSON and sets the Content-Type header automatically.",
+      "res.status() sets the HTTP status code. Chain it with .json() or .send(): res.status(404).json({ error: 'Not found' }).",
+      "res.redirect() sends a redirect response. By default it's 302 (temporary); use res.redirect(301, '/new-url') for permanent.",
+      "You can only send one response per request. Sending twice throws a 'Cannot set headers after they are sent' error.",
     ],
     notes: [
-      "Props are read-only inside the child. Never modify props.",
-      "You can pass any data type as a prop: string, number, array, object, function, even JSX.",
-      "Non-string props use curly braces: age={22}, not age='22'.",
-      "You can set default values for props using default parameters.",
+      "res.json(obj) → sends JSON + sets Content-Type: application/json automatically.",
+      "res.send(str) → sends text/html. res.send(buffer) → sends binary data.",
+      "res.status(code) → sets status. Must chain: res.status(201).json(data).",
+      "res.redirect('/path') → 302. res.redirect(301, '/path') → permanent 301.",
+      "res.sendFile(path) → sends a file. Path must be absolute.",
+      "res.set('Header-Name', 'value') → set a custom header.",
+      "res.cookie('name', 'value') → set a cookie. res.clearCookie('name') → remove it.",
+      "Common status codes: 200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Internal Server Error.",
     ],
-    code: `// Child component receives props as a parameter
-function UserCard({ name, age, role }) {
-  return (
-    <div>
-      <h3>{name}</h3>
-      <p>Age: {age}</p>
-      <p>Role: {role}</p>
-    </div>
-  );
-}
+    code: `const express = require('express');
+const app = express();
+app.use(express.json());
 
-// Parent passes props to child
-function App() {
-  return (
-    <div>
-      <UserCard name="Devendra" age={22} role="Developer" />
-      <UserCard name="Arjun" age={25} role="Designer" />
-      <UserCard name="Priya" age={28} role="Manager" />
-    </div>
-  );
-}
+// ── res.json ────────────────────────────────
+app.get('/users', (req, res) => {
+  const users = [{ id: 1, name: 'Dev' }, { id: 2, name: 'Arjun' }];
+  res.json(users);  // 200 OK + JSON body
+});
 
-// Default props example
-function Button({ label = "Click Me", color = "blue" }) {
-  return <button style={{ background: color }}>{label}</button>;
-}`,
+// ── res.status + res.json ───────────────────
+app.post('/users', (req, res) => {
+  const { name, email } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({ error: 'name and email are required' });
+  }
+
+  const newUser = { id: Date.now(), name, email };
+  res.status(201).json(newUser);  // 201 Created
+});
+
+// ── res.status 404 ──────────────────────────
+app.get('/users/:id', (req, res) => {
+  const user = getUserById(req.params.id); // pretend DB call
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  res.json(user);
+});
+
+// ── res.redirect ────────────────────────────
+app.get('/old-path', (req, res) => {
+  res.redirect('/new-path');         // 302 temporary
+});
+
+app.get('/legacy', (req, res) => {
+  res.redirect(301, '/modern');      // 301 permanent
+});
+
+// ── Custom headers ──────────────────────────
+app.get('/data', (req, res) => {
+  res.set('X-Custom-Header', 'my-value');
+  res.json({ data: 'here' });
+});
+
+app.listen(3000);`,
   },
   {
     id: 5,
-    emoji: "⚡",
-    title: "State (useState)",
+    emoji: "🔗",
+    title: "Middleware",
     color: "#34D399",
     theory: [
-      "State is data that belongs to a component and can change over time.",
-      "When state changes, React automatically re-renders the component with the new data.",
-      "Props come from outside (parent). State lives inside the component itself.",
-      "useState is a React Hook — a special function that adds state to a functional component.",
+      "Middleware functions are functions that run between the request arriving and the route handler executing. They have access to req, res, and a next function.",
+      "You MUST call next() at the end of a middleware function to pass control to the next middleware or route handler. If you don't, the request just hangs.",
+      "app.use() registers middleware globally (runs on every request). You can also scope middleware to a path: app.use('/api', myMiddleware).",
+      "Middleware runs in the order it is defined. This means you must register body-parsing middleware (express.json()) BEFORE any route that reads req.body.",
+      "Common built-in middleware: express.json() (parse JSON bodies), express.urlencoded() (parse form data), express.static() (serve files). Popular third-party: morgan (logging), helmet (security headers), cors.",
     ],
     notes: [
-      "useState returns an array with two things: [currentValue, setterFunction].",
-      "NEVER directly modify state like count = count + 1. Always use the setter: setCount(count + 1).",
-      "State updates may be batched — React is smart about when to re-render.",
-      "Each component instance has its own state — two <Counter /> components don't share state.",
-      "State can be any type: number, string, boolean, array, object.",
+      "Middleware signature: (req, res, next) → must call next() or send a response.",
+      "app.use(fn) → runs on EVERY request. app.use('/path', fn) → runs only for that path prefix.",
+      "Order matters — register middleware before the routes that need it.",
+      "express.json() is built-in since Express 4.16+. No need for body-parser package.",
+      "You can add multiple middleware in one app.use(): app.use(cors(), helmet(), morgan('dev'))",
+      "Route-specific middleware: app.get('/admin', authMiddleware, adminHandler)",
+      "Error handling middleware has 4 args: (err, req, res, next) — Express detects this automatically.",
     ],
-    code: `import { useState } from "react";
+    code: `const express = require('express');
+const app = express();
 
-function Counter() {
-  // Declare state: initial value is 0
-  const [count, setCount] = useState(0);
+// ── Built-in middleware ─────────────────────
+app.use(express.json());           // parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // parse form data
 
-  return (
-    <div>
-      <p>Count: {count}</p>
-      <button onClick={() => setCount(count + 1)}>+1</button>
-      <button onClick={() => setCount(count - 1)}>-1</button>
-      <button onClick={() => setCount(0)}>Reset</button>
-    </div>
-  );
+// ── Custom global middleware ────────────────
+app.use((req, res, next) => {
+  console.log(\`[\${new Date().toISOString()}] \${req.method} \${req.url}\`);
+  next(); // MUST call next() or request hangs!
+});
+
+// ── Custom auth middleware ──────────────────
+function requireAuth(req, res, next) {
+  const token = req.get('Authorization');
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+    // note: return prevents calling next() after sending response
+  }
+  // token is valid — attach user and continue
+  req.user = { id: 1, name: 'Dev' }; // attach data to req
+  next();
 }
 
-// Boolean state example
-function Toggle() {
-  const [isOn, setIsOn] = useState(false);
+// Apply middleware to specific routes only
+app.get('/public',    (req, res) => res.json({ msg: 'Anyone can see this' }));
+app.get('/dashboard', requireAuth, (req, res) => {
+  res.json({ msg: \`Welcome \${req.user.name}\` });
+});
 
-  return (
-    <button onClick={() => setIsOn(!isOn)}>
-      {isOn ? "ON 🟢" : "OFF 🔴"}
-    </button>
-  );
-}`,
+// ── Path-scoped middleware ──────────────────
+app.use('/api', (req, res, next) => {
+  console.log('API request incoming');
+  next();
+});
+
+app.listen(3000);`,
   },
   {
     id: 6,
-    emoji: "🖱️",
-    title: "Event Handling",
+    emoji: "📦",
+    title: "Body Parsing & express.json()",
     color: "#FB923C",
     theory: [
-      "React handles events similarly to HTML but with a few key differences.",
-      "In React, event names are camelCase (onClick, not onclick).",
-      "You pass a function reference, not a function call, as the event handler.",
-      "React uses Synthetic Events — wrappers around native browser events, so they work consistently across all browsers.",
+      "HTTP request bodies are sent as raw text streams. Express doesn't parse them automatically — you need middleware to parse the body into a usable JavaScript object.",
+      "express.json() is built-in middleware that parses requests with Content-Type: application/json and makes the result available as req.body.",
+      "express.urlencoded({ extended: true }) parses HTML form submissions (application/x-www-form-urlencoded) — needed when your frontend sends a regular HTML form.",
+      "You must register these middleware before any route that reads req.body — if you register them after, req.body will be undefined.",
+      "For file uploads, you need a dedicated package like multer — express.json() only handles JSON and text, not multipart form data.",
     ],
     notes: [
-      "onClick={() => doSomething()} ✅ — passes a function.",
-      "onClick={doSomething()} ❌ — calls the function immediately on render!",
-      "Common events: onClick, onChange, onSubmit, onKeyDown, onMouseOver, onFocus.",
-      "Event object (e) is automatically passed to handlers — use e.target.value to get input value.",
-      "Use e.preventDefault() to stop default browser behavior (like form submission).",
+      "app.use(express.json()) → parses JSON. Required for REST APIs receiving JSON data.",
+      "app.use(express.urlencoded({ extended: true })) → parses HTML form submissions.",
+      "{ extended: true } uses the qs library for rich objects. { extended: false } uses querystring.",
+      "If Content-Type is not application/json, express.json() does nothing — req.body stays undefined.",
+      "Request body size limit default is 100kb. Change with: express.json({ limit: '10mb' })",
+      "For file uploads: npm install multer. multer handles multipart/form-data.",
+      "Always register body parsers at the TOP of your middleware stack, before routes.",
     ],
-    code: `import { useState } from "react";
+    code: `const express = require('express');
+const app = express();
 
-function EventDemo() {
-  const [text, setText] = useState("");
+// ── Register body parsers FIRST ─────────────
+app.use(express.json());                         // for application/json
+app.use(express.urlencoded({ extended: true })); // for HTML form submissions
 
-  // Handler functions defined separately — clean approach
-  function handleClick() {
-    alert("Button clicked!");
+// ── JSON body example ───────────────────────
+// Client sends: POST /users
+// Content-Type: application/json
+// Body: { "name": "Devendra", "email": "dev@test.com", "age": 22 }
+
+app.post('/users', (req, res) => {
+  console.log(req.body);
+  // { name: 'Devendra', email: 'dev@test.com', age: 22 }
+
+  const { name, email, age } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({ error: 'name and email required' });
   }
 
-  function handleChange(e) {
-    setText(e.target.value); // e.target.value = what user typed
-  }
+  res.status(201).json({ id: Date.now(), name, email, age });
+});
 
-  function handleSubmit(e) {
-    e.preventDefault(); // stops page from reloading
-    alert("Submitted: " + text);
-  }
+// ── Form body example ───────────────────────
+// Client sends: POST /login
+// Content-Type: application/x-www-form-urlencoded
+// Body: username=dev&password=secret
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={text}
-        onChange={handleChange}
-        placeholder="Type something..."
-      />
-      <button type="button" onClick={handleClick}>
-        Alert
-      </button>
-      <button type="submit">Submit</button>
-      <p>You typed: {text}</p>
-    </form>
-  );
-}`,
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  // req.body = { username: 'dev', password: 'secret' }
+  res.json({ username, loggedIn: true });
+});
+
+// ── Without body parser (req.body = undefined) ──
+// app.post('/broken', (req, res) => {
+//   console.log(req.body); // undefined! Forgot to add express.json()
+// });
+
+app.listen(3000);`,
   },
+];
+
+// ─── Topics 7–12: Intermediate ────────────────────────────────────────────────
+const topicsIntermediate = [
   {
     id: 7,
-    emoji: "🔀",
-    title: "Conditional Rendering",
-    color: "#F472B6",
+    emoji: "🗂️",
+    title: "Express Router",
+    color: "#61DAFB",
     theory: [
-      "Conditional rendering means showing different UI based on certain conditions.",
-      "Since JSX is just JavaScript, you can use normal JS logic (if, ternary, &&) to decide what to render.",
-      "React renders nothing for null, undefined, and false — useful for hiding elements.",
+      "As your app grows, putting all routes in server.js becomes unmanageable. Express Router lets you split routes into separate files — one per resource.",
+      "express.Router() creates a mini-app with its own middleware and routes. You define routes on it exactly like app, then mount it on the main app with app.use().",
+      "The path you pass to app.use() is the prefix. If you mount a router at /users, all routes inside it are relative to /users — so router.get('/:id') handles GET /users/:id.",
+      "This modular pattern is the standard way to organize Express apps. Each router file is a self-contained module — easy to test, maintain, and reason about.",
+      "Router-level middleware works the same as app-level middleware but only applies to routes on that router.",
     ],
     notes: [
-      "Ternary (condition ? A : B) — use when you need to show one thing OR another.",
-      "&& operator — use when you want to show something OR nothing.",
-      "Avoid putting 0 before && (0 && <X/> will render 0!). Convert to boolean: {count > 0 && <X/>}.",
-      "For complex logic, use a regular if/else before the return statement.",
+      "const router = express.Router() → create a router.",
+      "router.get(), .post(), .put(), .delete() → same API as app.",
+      "app.use('/prefix', router) → mount the router. All router routes are relative to the prefix.",
+      "Export the router with module.exports = router, import it in server.js.",
+      "Router-level middleware: router.use(fn) → applies only to this router's routes.",
+      "router.param('id', fn) → middleware that runs whenever a route contains :id.",
     ],
-    code: `import { useState } from "react";
+    code: `// routes/users.js
+const express = require('express');
+const router  = express.Router();
 
-function ConditionalDemo() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [score, setScore] = useState(75);
+// All these routes will be prefixed with /users
+// (because of how we mount in server.js)
 
-  return (
-    <div>
-      {/* Method 1: Ternary — show one OR the other */}
-      {isLoggedIn ? (
-        <h2>Welcome back, Devendra! 👋</h2>
-      ) : (
-        <h2>Please log in.</h2>
-      )}
+// GET /users
+router.get('/', (req, res) => {
+  res.json([{ id: 1, name: 'Dev' }, { id: 2, name: 'Arjun' }]);
+});
 
-      <button onClick={() => setIsLoggedIn(!isLoggedIn)}>
-        Toggle Login
-      </button>
+// GET /users/:id
+router.get('/:id', (req, res) => {
+  res.json({ id: req.params.id, name: 'Dev' });
+});
 
-      {/* Method 2: && — show something OR nothing */}
-      {score >= 60 && <p>✅ You passed!</p>}
-      {score < 60 && <p>❌ You failed.</p>}
+// POST /users
+router.post('/', (req, res) => {
+  const { name, email } = req.body;
+  res.status(201).json({ id: Date.now(), name, email });
+});
 
-      {/* Method 3: if/else before return (for complex logic) */}
-      <Grade score={score} />
-    </div>
-  );
-}
+// PUT /users/:id
+router.put('/:id', (req, res) => {
+  res.json({ updated: true, id: req.params.id });
+});
 
-function Grade({ score }) {
-  let message;
-  if (score >= 90) message = "A — Excellent!";
-  else if (score >= 75) message = "B — Good job!";
-  else if (score >= 60) message = "C — Pass";
-  else message = "F — Try again";
+// DELETE /users/:id
+router.delete('/:id', (req, res) => {
+  res.json({ deleted: true, id: req.params.id });
+});
 
-  return <p>Grade: {message}</p>;
-}`,
+module.exports = router;
+
+// ─────────────────────────────────────────────
+// server.js — mount the router
+const express     = require('express');
+const usersRouter = require('./routes/users');
+const postsRouter = require('./routes/posts');
+
+const app = express();
+app.use(express.json());
+
+app.use('/users', usersRouter); // /users, /users/:id, etc.
+app.use('/posts', postsRouter); // /posts, /posts/:id, etc.
+
+app.listen(3000, () => console.log('Running on 3000'));`,
   },
   {
     id: 8,
-    emoji: "📋",
-    title: "Lists & Keys",
-    color: "#38BDF8",
+    emoji: "🚨",
+    title: "Error Handling",
+    color: "#FF6B6B",
     theory: [
-      "To render a list of items in React, you use the .map() array method.",
-      ".map() transforms each item in an array into a JSX element.",
-      "React needs a key prop on each list item so it can track which items changed, were added, or removed.",
-      "Keys help React's reconciliation algorithm be efficient — without keys, React re-renders everything.",
+      "Express has a special type of middleware for handling errors — it takes four arguments: (err, req, res, next). Express detects the 4 args and treats it as an error handler.",
+      "To trigger error handling, call next(err) with an error object from any route or middleware. Express skips all normal middleware and jumps directly to the error handler.",
+      "Place error handling middleware at the very end of your middleware stack — after all routes. Express won't reach it unless next(err) is called.",
+      "In async route handlers, errors from awaited calls don't automatically trigger next(err). You must wrap the handler in try/catch and call next(err) in the catch block.",
+      "Centralized error handling keeps your route handlers clean — they just throw or call next(err), and the error middleware handles logging and sending the response.",
     ],
     notes: [
-      "Key must be unique among siblings — not globally unique.",
-      "Use a unique ID from your data as the key. Avoid using index as key (it causes bugs when list order changes).",
-      "Keys are not passed as props — you can't access props.key inside the child.",
-      "The key goes on the outermost element returned in the .map().",
+      "Error middleware: (err, req, res, next) — 4 args, must be at end of all routes.",
+      "Call next(err) to skip to the error handler from any middleware or route.",
+      "In async handlers: use try/catch → next(err), or use a wrapper like express-async-errors.",
+      "Attach status to error: err.status = 404 → read in error handler for the right code.",
+      "Don't call next() after res.json() — use return res.json() to prevent double-send.",
+      "404 handler: add a catch-all route app.use((req, res) => res.status(404).json({error:'Not found'})) before the error handler.",
     ],
-    code: `import { useState } from "react";
+    code: `const express = require('express');
+const app = express();
+app.use(express.json());
 
-const users = [
-  { id: 1, name: "Devendra", city: "Mumbai" },
-  { id: 2, name: "Arjun", city: "Delhi" },
-  { id: 3, name: "Priya", city: "Bangalore" },
-];
-
-function UserList() {
-  return (
-    <ul>
-      {users.map((user) => (
-        // key goes here — on the element returned from .map()
-        <li key={user.id}>
-          {user.name} — {user.city}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-// Dynamic list with state
-function TodoList() {
-  const [todos, setTodos] = useState([
-    { id: 1, text: "Learn React" },
-    { id: 2, text: "Build a project" },
-  ]);
-
-  function removeTodo(id) {
-    setTodos(todos.filter((todo) => todo.id !== id));
+// ── Normal route — sync ─────────────────────
+app.get('/sync-error', (req, res, next) => {
+  try {
+    throw new Error('Something went wrong!');
+  } catch (err) {
+    next(err); // pass to error handler
   }
+});
 
-  return (
-    <ul>
-      {todos.map((todo) => (
-        <li key={todo.id}>
-          {todo.text}
-          <button onClick={() => removeTodo(todo.id)}>❌</button>
-        </li>
-      ))}
-    </ul>
-  );
-}`,
+// ── Async route — try/catch ─────────────────
+app.get('/users/:id', async (req, res, next) => {
+  try {
+    const user = await getUserFromDB(req.params.id); // imaginary DB call
+    if (!user) {
+      const err = new Error('User not found');
+      err.status = 404;
+      return next(err);
+    }
+    res.json(user);
+  } catch (err) {
+    next(err); // DB error forwarded to error handler
+  }
+});
+
+// ── 404 catch-all (before error handler) ────
+app.use((req, res, next) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+// ── Error handling middleware (4 args!) ──────
+// MUST be last — after all routes and middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  const status  = err.status  || 500;
+  const message = err.message || 'Internal Server Error';
+
+  res.status(status).json({
+    error:   message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
+});
+
+app.listen(3000);`,
   },
   {
     id: 9,
-    emoji: "🎨",
-    title: "Basic Styling",
-    color: "#FBBF24",
+    emoji: "🌐",
+    title: "Environment Variables & dotenv",
+    color: "#A78BFA",
     theory: [
-      "React gives you multiple ways to style components — each with different tradeoffs.",
-      "Inline styles: written as JS objects directly in JSX. Good for dynamic styles.",
-      "CSS files: import a .css file and use className. Most familiar, works globally.",
-      "CSS Modules: scoped CSS — styles only apply to the component that imports them (no clashes).",
+      "Environment variables store configuration values (database URLs, API keys, ports) outside your code — so secrets never end up in your Git repository.",
+      "The dotenv package reads a .env file in your project root and loads each variable into process.env, making them available anywhere in your Node.js code.",
+      "You call require('dotenv').config() as early as possible — typically the very first line of your entry file (server.js) — so the variables are available before any other code runs.",
+      "Always add .env to .gitignore. Share a .env.example file with placeholder values so teammates know what variables are needed.",
+      "On production servers (Heroku, Railway, Render), you set environment variables directly in the platform dashboard — no .env file is deployed.",
     ],
     notes: [
-      "In JSX, use className instead of class.",
-      "Inline styles use camelCase: backgroundColor not background-color.",
-      "Inline style values are strings or numbers: { fontSize: 16 } not { fontSize: '16px' } (px is auto-added for numbers).",
-      "CSS Modules give you locally scoped class names — best for large apps.",
-      "Popular alternatives: Tailwind CSS, styled-components, Emotion.",
+      "npm install dotenv → require('dotenv').config() at the top of server.js.",
+      ".env format: KEY=value (no spaces, no quotes needed for simple values).",
+      "Add .env to .gitignore — NEVER commit secrets to Git.",
+      "Create a .env.example with empty values so teammates know what's needed.",
+      "Access: process.env.MY_KEY anywhere in Node.js after dotenv.config().",
+      "PORT: const PORT = process.env.PORT || 3000 — hosting platforms auto-set PORT.",
+      "NODE_ENV: process.env.NODE_ENV === 'production' → toggle production behaviours.",
     ],
-    code: `// METHOD 1: Inline styles (JS object)
-function InlineStyleDemo() {
-  const isActive = true;
+    code: `// .env file (never commit!)
+PORT=3000
+NODE_ENV=development
+DATABASE_URL=mongodb://localhost:27017/mydb
+JWT_SECRET=my-super-secret-key-change-this
+API_KEY=sk-abc123xyz
 
-  const boxStyle = {
-    backgroundColor: isActive ? "green" : "gray",
-    color: "white",
-    padding: "12px",
-    borderRadius: "8px",
-  };
+// .env.example (safe to commit — shows required vars)
+PORT=
+NODE_ENV=
+DATABASE_URL=
+JWT_SECRET=
+API_KEY=
 
-  return <div style={boxStyle}>I am {isActive ? "active" : "inactive"}</div>;
-}
+// server.js — load dotenv FIRST, before anything else
+require('dotenv').config(); // load .env → process.env
 
-// METHOD 2: External CSS file
-// In App.css:
-// .title { font-size: 24px; color: navy; }
-// .card { border: 1px solid #ccc; padding: 16px; }
+const express = require('express');
+const app = express();
 
-import "./App.css";
-function CSSDemo() {
-  return (
-    <div className="card">
-      <h1 className="title">Styled with CSS file</h1>
-    </div>
-  );
-}
+// Now process.env has all variables from .env
+const PORT = process.env.PORT || 3000;
+const DB   = process.env.DATABASE_URL;
 
-// METHOD 3: Dynamic className
-function DynamicClass({ isError }) {
-  return (
-    <p className={isError ? "error-text" : "normal-text"}>
-      {isError ? "Something went wrong!" : "All good!"}
-    </p>
-  );
-}`,
+console.log('Connecting to:', DB);
+
+app.get('/', (req, res) => {
+  // Never expose secrets in responses!
+  res.json({
+    env: process.env.NODE_ENV,
+    // Don't do: apiKey: process.env.API_KEY  ← security risk
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(\`Server running on port \${PORT}\`);
+});
+
+// .gitignore (make sure this exists!)
+// node_modules/
+// .env`,
   },
-];
-
-// ─── Topics 10–18 data ───────────────────────────────────────────────────────
-const topics1018 = [
   {
     id: 10,
-    emoji: "🔁",
-    title: "useEffect",
-    color: "#61DAFB",
+    emoji: "🔒",
+    title: "CORS & Security Headers",
+    color: "#34D399",
     theory: [
-      "useEffect is a Hook that lets you run side effects in a functional component.",
-      "A side effect is anything that reaches outside the component: fetching data, setting a timer, manually changing the DOM, subscribing to events.",
-      "useEffect runs AFTER React renders the component to the screen — not during render.",
-      "It takes two arguments: a callback function (the effect) and a dependency array that controls WHEN the effect runs.",
+      "CORS (Cross-Origin Resource Sharing) is a browser security feature that blocks requests from a different origin (domain/port) than the server. When your React frontend at localhost:5173 calls your Express API at localhost:3000, the browser blocks it by default.",
+      "The cors npm package adds the right Access-Control-Allow-Origin headers to your responses, telling browsers it's safe to allow cross-origin requests.",
+      "You can allow all origins (cors()) for public APIs, or restrict to specific origins (cors({ origin: 'https://myapp.com' })) for production apps.",
+      "helmet is a middleware that sets various HTTP headers to protect your app from common web vulnerabilities: XSS, clickjacking, sniffing attacks, etc. It's a one-line security boost.",
+      "morgan is a logging middleware that logs every request with method, URL, status, and response time — invaluable for debugging and monitoring.",
     ],
     notes: [
-      "useEffect(() => {}, []) — runs ONCE after the first render (like componentDidMount).",
-      "useEffect(() => {}) — no dependency array → runs after EVERY render. Usually not what you want.",
-      "useEffect(() => {}, [count]) — runs after first render AND whenever count changes.",
-      "Return a cleanup function to cancel subscriptions, timers, etc. when the component unmounts.",
-      "Never put async directly inside useEffect. Define async function inside and call it.",
+      "npm install cors → app.use(cors()) → allows all origins (fine for development).",
+      "Production: cors({ origin: ['https://myapp.com', 'https://admin.myapp.com'] })",
+      "CORS is a browser restriction — direct API tools like Postman/Thunder Client are not affected.",
+      "npm install helmet → app.use(helmet()) → sets 11 security headers in one line.",
+      "npm install morgan → app.use(morgan('dev')) → logs: GET /users 200 5ms",
+      "Morgan formats: 'dev' (colorful, concise), 'combined' (Apache format, good for production logs).",
+      "Register cors and helmet BEFORE routes so every response gets the headers.",
     ],
-    code: `import { useState, useEffect } from "react";
+    code: `const express = require('express');
+const cors    = require('cors');
+const helmet  = require('helmet');
+const morgan  = require('morgan');
 
-// [] = run only once after first render
-function UserProfile() {
-  const [user, setUser] = useState(null);
+// npm install cors helmet morgan
 
-  useEffect(() => {
-    async function fetchUser() {
-      const res = await fetch("https://jsonplaceholder.typicode.com/users/1");
-      const data = await res.json();
-      setUser(data);
-    }
-    fetchUser();
-  }, []);
+const app = express();
 
-  if (!user) return <p>Loading...</p>;
-  return <h2>Hello, {user.name}!</h2>;
-}
+// ── Security & Logging (register early) ─────
+app.use(helmet());        // sets security headers
+app.use(morgan('dev'));   // logs: GET /users 200 5.123 ms
 
-// [query] = re-run whenever query changes
-function SearchBox({ query }) {
-  useEffect(() => {
-    if (!query) return;
-    console.log("Searching:", query);
-  }, [query]);
+// ── CORS — allow all origins (development) ──
+app.use(cors());
 
-  return <div>Search box</div>;
-}
+// ── CORS — specific origins (production) ────
+// app.use(cors({
+//   origin: ['https://myapp.com', 'https://admin.myapp.com'],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   credentials: true, // allow cookies/auth headers
+// }));
 
-// Cleanup example — clear timer on unmount
-function Timer() {
-  const [seconds, setSeconds] = useState(0);
+app.use(express.json());
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSeconds((s) => s + 1);
-    }, 1000);
+app.get('/api/data', (req, res) => {
+  res.json({ message: 'This works from any origin!' });
+});
 
-    return () => clearInterval(interval); // cleanup!
-  }, []);
+// ── Manual CORS headers (without the package) ──
+// (just so you understand what cors() does)
+// app.use((req, res, next) => {
+//   res.setHeader('Access-Control-Allow-Origin', '*');
+//   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+//   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+//   next();
+// });
 
-  return <p>Timer: {seconds}s</p>;
-}`,
+app.listen(3000, () => console.log('Server on 3000'));`,
   },
   {
     id: 11,
-    emoji: "📋",
-    title: "Forms & Controlled Components",
-    color: "#F7DF1E",
+    emoji: "📁",
+    title: "Static Files",
+    color: "#F59E0B",
     theory: [
-      "In React, a controlled component is one where React controls the form input's value via state.",
-      "Every keystroke updates state, and the input's value is always driven by that state — React is the single source of truth.",
-      "This is the opposite of uncontrolled components, where the DOM itself holds the value.",
-      "Controlled components give you full control: validation, formatting, conditional disabling — all easy.",
+      "Express can serve static files (HTML, CSS, images, JavaScript) from a folder using the built-in express.static() middleware. No routes needed — files are served automatically by their filename.",
+      "app.use(express.static('public')) tells Express: 'for any request, first check if a file with that name exists in the public/ folder — if so, serve it directly'.",
+      "A request to /logo.png would look for public/logo.png. A request to /css/style.css would look for public/css/style.css.",
+      "You can mount static middleware at a virtual prefix: app.use('/assets', express.static('public')) means files are served at /assets/logo.png, not /logo.png.",
+      "Static middleware is commonly used to serve a built React/Vue app — point it at the dist/ folder and every /index.html request serves your SPA.",
     ],
     notes: [
-      "Always pair value={state} with onChange={handler} on an input. Without onChange, the input becomes read-only.",
-      "For checkboxes use checked={bool} instead of value.",
-      "For select elements, put value on the select tag, not on option tags.",
-      "e.preventDefault() in onSubmit stops page reload.",
-      "Use a single state object for multi-field forms with one shared handler using e.target.name.",
+      "express.static() is built-in — no extra install needed.",
+      "app.use(express.static('public')) → files in public/ served at their path.",
+      "app.use('/assets', express.static('public')) → files served at /assets/...",
+      "Path must be relative to where you run node from — use path.join(__dirname, 'public') for reliability.",
+      "Static files are served before routes — if a file matches, the route never runs.",
+      "To serve a React build: app.use(express.static(path.join(__dirname, 'client/dist')))",
+      "Catch-all for SPA: app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'client/dist/index.html')))",
     ],
-    code: `import { useState } from "react";
+    code: `const express = require('express');
+const path    = require('path'); // built-in Node module
+const app     = express();
 
-function LoginForm() {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+// ── Serve static files from public/ folder ──
+// public/
+// ├── index.html
+// ├── style.css
+// ├── app.js
+// └── images/
+//     └── logo.png
 
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }
+app.use(express.static(path.join(__dirname, 'public')));
+// Requests:
+//   GET /          → serves public/index.html
+//   GET /style.css → serves public/style.css
+//   GET /images/logo.png → serves public/images/logo.png
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (!form.email || !form.password) {
-      setError("Both fields are required.");
-      return;
-    }
-    setError("");
-    alert("Submitted: " + form.email);
-  }
+// ── Virtual prefix ───────────────────────────
+app.use('/static', express.static(path.join(__dirname, 'public')));
+// Now files are at /static/style.css, /static/images/logo.png
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="email"
-        name="email"
-        value={form.email}
-        onChange={handleChange}
-        placeholder="Email"
-      />
-      <input
-        type="password"
-        name="password"
-        value={form.password}
-        onChange={handleChange}
-        placeholder="Password"
-      />
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <button type="submit">Login</button>
-    </form>
-  );
-}
+// ── API routes still work normally ──────────
+app.get('/api/hello', (req, res) => {
+  res.json({ message: 'API still works!' });
+});
 
-// Checkbox + Select
-function Preferences() {
-  const [agreed, setAgreed] = useState(false);
-  const [country, setCountry] = useState("india");
+// ── Serve a built React app (common pattern) ─
+app.use(express.static(path.join(__dirname, 'client/dist')));
 
-  return (
-    <div>
-      <input
-        type="checkbox"
-        checked={agreed}
-        onChange={(e) => setAgreed(e.target.checked)}
-      />
-      <label> I agree to terms</label>
-      <br />
-      <select value={country} onChange={(e) => setCountry(e.target.value)}>
-        <option value="india">India</option>
-        <option value="usa">USA</option>
-        <option value="uk">UK</option>
-      </select>
-    </div>
-  );
-}`,
+// Catch-all: serve index.html for any non-API route
+// (so React Router works on page refresh)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
+});
+
+app.listen(3000);`,
   },
   {
     id: 12,
-    emoji: "🏋️",
-    title: "Lifting State Up",
-    color: "#FF6B6B",
+    emoji: "🏛️",
+    title: "REST API Design",
+    color: "#EF4444",
     theory: [
-      "When two sibling components need to share the same state, you lift that state up to their closest common parent.",
-      "The parent holds the state and passes it down as props to both children.",
-      "The parent also passes down handler functions so children can request state changes — since props are read-only.",
-      "Data flows down (props), events flow up (callbacks). This is the core of React's one-way data flow.",
+      "REST (Representational State Transfer) is a convention for designing APIs. A RESTful API maps HTTP methods to CRUD operations on resources.",
+      "Resources are nouns (users, posts, products). HTTP methods are verbs. GET /users is 'get all users'. POST /users is 'create a user'. DELETE /users/5 is 'delete user 5'.",
+      "Always return appropriate HTTP status codes: 200 (success), 201 (created), 400 (bad request / validation error), 401 (not authenticated), 403 (forbidden), 404 (not found), 500 (server error).",
+      "Keep routes consistent: use plural nouns (/users not /user), nest related resources (/users/:id/posts), and never put verbs in URLs (/users/delete/5 is wrong — use DELETE /users/5).",
+      "Response bodies should be consistent: always return JSON, always include meaningful error messages, and consider wrapping lists in objects for extensibility ({ data: [...], total: 100 }).",
     ],
     notes: [
-      "If two components need the same data, their state belongs in their closest common ancestor.",
-      "The child never modifies state directly — it calls a function passed down from the parent.",
-      "This pattern scales well but can get tedious with many levels — that's when Context or state managers help.",
-      "The parent is the single source of truth for shared state.",
+      "GET /users → 200, list. GET /users/:id → 200 or 404.",
+      "POST /users → 201, created object. PUT /users/:id → 200, full replace. PATCH /users/:id → 200, partial update.",
+      "DELETE /users/:id → 200 { deleted: true } or 204 No Content.",
+      "Status codes matter: 400 = client mistake, 401 = not logged in, 403 = logged in but no permission, 404 = not found, 500 = server crash.",
+      "Nested routes: GET /users/:userId/posts → posts belonging to a user.",
+      "Versioning: /api/v1/users — lets you release breaking changes in v2 without breaking v1 clients.",
+      "Never put verbs in URLs: /getUsers ❌, /deleteUser ❌. Use HTTP methods instead: GET /users ✅, DELETE /users/:id ✅.",
     ],
-    code: `import { useState } from "react";
+    code: `const express = require('express');
+const router  = express.Router();
 
-function TemperatureInput({ unit, temp, onTempChange }) {
-  return (
-    <div>
-      <label>Temperature in {unit}: </label>
-      <input
-        type="number"
-        value={temp}
-        onChange={(e) => onTempChange(e.target.value)}
-      />
-    </div>
-  );
-}
+// ── Full CRUD for /api/users ─────────────────
 
-function BoilingResult({ celsius }) {
-  return (
-    <p>
-      {celsius >= 100 ? "🔥 Water would boil!" : "💧 Water would NOT boil."}
-    </p>
-  );
-}
+// GET /api/users — list all (with optional filter)
+router.get('/', async (req, res) => {
+  const { limit = 20, page = 1 } = req.query;
+  const users = await User.find().limit(limit).skip((page - 1) * limit);
+  res.json({ data: users, page: Number(page) });
+});
 
-// Parent holds ALL shared state
-function TemperatureCalculator() {
-  const [celsius, setCelsius] = useState(0);
-  const fahrenheit = (celsius * 9) / 5 + 32;
+// GET /api/users/:id — get one
+router.get('/:id', async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (err) { next(err); }
+});
 
-  return (
-    <div>
-      <TemperatureInput
-        unit="Celsius"
-        temp={celsius}
-        onTempChange={(val) => setCelsius(Number(val))}
-      />
-      <TemperatureInput
-        unit="Fahrenheit"
-        temp={fahrenheit}
-        onTempChange={(val) => setCelsius(((Number(val) - 32) * 5) / 9)}
-      />
-      <BoilingResult celsius={celsius} />
-    </div>
-  );
-}`,
+// POST /api/users — create
+router.post('/', async (req, res, next) => {
+  try {
+    const { name, email } = req.body;
+    if (!name || !email)
+      return res.status(400).json({ error: 'name and email are required' });
+
+    const user = await User.create({ name, email });
+    res.status(201).json(user);        // 201 Created
+  } catch (err) { next(err); }
+});
+
+// PATCH /api/users/:id — partial update
+router.patch('/:id', async (req, res, next) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id, req.body, { new: true }
+    );
+    if (!user) return res.status(404).json({ error: 'Not found' });
+    res.json(user);
+  } catch (err) { next(err); }
+});
+
+// DELETE /api/users/:id — delete
+router.delete('/:id', async (req, res, next) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ error: 'Not found' });
+    res.json({ deleted: true, id: req.params.id });
+  } catch (err) { next(err); }
+});
+
+module.exports = router;`,
   },
+];
+
+// ─── Topics 13–18: Advanced ───────────────────────────────────────────────────
+const topicsAdvanced = [
   {
     id: 13,
-    emoji: "🧱",
-    title: "Component Composition",
-    color: "#A78BFA",
+    emoji: "🔐",
+    title: "Authentication with JWT",
+    color: "#61DAFB",
     theory: [
-      "Composition is the pattern of building complex UIs by combining simple, reusable components.",
-      "The children prop is a special prop React automatically passes — it contains whatever you put between a component's opening and closing tags.",
-      "Think of it like HTML div tags that wrap their children — you can do the same with your own components.",
-      "Composition is preferred over inheritance in React — you rarely need class-based inheritance.",
+      "JWT (JSON Web Token) is the most common stateless authentication method for REST APIs. The server issues a signed token; the client sends it back with every request.",
+      "On login: verify the password → sign a JWT with a secret → send the token to the client. The token contains a payload (user ID, role) and is signed — tamper-proof.",
+      "On protected routes: the client sends the JWT in the Authorization header: 'Bearer <token>'. Middleware verifies the token and attaches the user to req.user.",
+      "JWTs are stateless — the server doesn't store sessions. Any server with the same secret can verify the token. This makes them great for scalable APIs.",
+      "bcryptjs is used to hash passwords before storing them. Never store plain-text passwords. When a user logs in, compare the input with the stored hash using bcrypt.compare().",
     ],
     notes: [
-      "props.children contains everything between the component's opening and closing tags.",
-      "Use composition to build layout wrappers: Card, Modal, Panel — generic shells that wrap any content.",
-      "You can pass JSX as any prop, not just children — this is called the slot pattern.",
-      "Composition avoids prop drilling for UI structure — children flow naturally without extra props.",
+      "npm install jsonwebtoken bcryptjs",
+      "jwt.sign(payload, secret, { expiresIn: '7d' }) → creates a token.",
+      "jwt.verify(token, secret) → validates and decodes. Throws if invalid/expired.",
+      "bcrypt.hash(password, 10) → hashes with 10 salt rounds. bcrypt.compare(plain, hash) → verifies.",
+      "Store the JWT in localStorage (simple) or httpOnly cookies (more secure).",
+      "Send token: Authorization: Bearer <token> header.",
+      "Never store sensitive data in JWT payload — it's base64 encoded, not encrypted.",
     ],
-    code: `import { useState } from "react";
+    code: `const express  = require('express');
+const jwt      = require('jsonwebtoken');
+const bcrypt   = require('bcryptjs');
+require('dotenv').config();
 
-// Generic Card wrapper
-function Card({ title, children, color = "#61DAFB" }) {
-  return (
-    <div style={{
-      border: \`2px solid \${color}\`,
-      borderRadius: "10px",
-      padding: "16px",
-      marginBottom: "12px",
-    }}>
-      {title && <h3 style={{ color }}>{title}</h3>}
-      {children}
-    </div>
+const app    = express();
+const router = express.Router();
+app.use(express.json());
+
+// Fake DB — replace with real DB
+const users = [];
+
+// ── Register ─────────────────────────────────
+router.post('/register', async (req, res) => {
+  const { name, email, password } = req.body;
+  if (!name || !email || !password)
+    return res.status(400).json({ error: 'All fields required' });
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = { id: Date.now(), name, email, password: hashedPassword };
+  users.push(user);
+
+  res.status(201).json({ message: 'User created', id: user.id });
+});
+
+// ── Login ─────────────────────────────────────
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  const user = users.find(u => u.email === email);
+
+  if (!user || !(await bcrypt.compare(password, user.password)))
+    return res.status(401).json({ error: 'Invalid credentials' });
+
+  const token = jwt.sign(
+    { id: user.id, email: user.email },   // payload
+    process.env.JWT_SECRET,               // secret
+    { expiresIn: '7d' }                   // expiry
   );
+
+  res.json({ token });
+});
+
+// ── Auth middleware ───────────────────────────
+function protect(req, res, next) {
+  const header = req.get('Authorization');
+  if (!header?.startsWith('Bearer '))
+    return res.status(401).json({ error: 'No token' });
+
+  try {
+    const token = header.split(' ')[1];
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ error: 'Invalid or expired token' });
+  }
 }
 
-// Button with children
-function FancyButton({ children, onClick, variant = "primary" }) {
-  const bg = variant === "danger" ? "#FF6B6B" : "#61DAFB";
-  const fg = variant === "danger" ? "#fff" : "#000";
-  return (
-    <button onClick={onClick}
-      style={{ background: bg, color: fg, border: "none",
-               padding: "8px 14px", borderRadius: 6, cursor: "pointer" }}>
-      {children}
-    </button>
-  );
-}
+// ── Protected route ───────────────────────────
+router.get('/me', protect, (req, res) => {
+  res.json({ user: req.user });
+});
 
-// Slot pattern — named children via props
-function Layout({ sidebar, content }) {
-  return (
-    <div style={{ display: "flex", gap: "16px" }}>
-      <aside style={{ width: "150px", background: "#21262d", padding: 8, borderRadius: 6 }}>
-        {sidebar}
-      </aside>
-      <main style={{ flex: 1 }}>{content}</main>
-    </div>
-  );
-}
-
-function App() {
-  return (
-    <div>
-      <Card title="User Info" color="#34D399">
-        <p>Name: Devendra</p>
-        <FancyButton>Edit</FancyButton>{" "}
-        <FancyButton variant="danger">Delete</FancyButton>
-      </Card>
-      <Layout
-        sidebar={<p>Nav links</p>}
-        content={<p>Main content area</p>}
-      />
-    </div>
-  );
-}`,
+app.use('/auth', router);
+app.listen(3000);`,
   },
   {
     id: 14,
-    emoji: "🗺️",
-    title: "React Router",
-    color: "#34D399",
+    emoji: "🍃",
+    title: "Connecting to MongoDB (Mongoose)",
+    color: "#10B981",
     theory: [
-      "React Router is the standard library for adding navigation to a React app. Install it with: npm install react-router-dom",
-      "React apps are Single Page Applications (SPAs) — the browser never loads a new HTML page. React Router fakes navigation by swapping components based on the URL.",
-      "The URL changes, but the page never fully reloads. React Router intercepts browser navigation and renders the matching component.",
-      "Below is a live simulation of routing using useState so you can understand the concept. In your real project, use the actual library as shown in the Notes tab.",
+      "Mongoose is an ODM (Object Data Mapper) for MongoDB and Node.js. It adds schemas, models, and validation on top of the raw MongoDB driver.",
+      "You define a Schema that describes the shape of your documents — field names, types, required/optional, defaults. Mongoose enforces this schema before saving.",
+      "A Model is a class created from a Schema. It gives you methods like User.find(), User.create(), User.findById(), User.findByIdAndUpdate(), User.findByIdAndDelete().",
+      "Connect with mongoose.connect(process.env.MONGO_URI). Mongoose queues operations until connected — no need to wait before defining models.",
+      "Mongoose automatically creates an _id (ObjectId) for every document. It also handles type coercion — sending a string for a Number field will be cast automatically.",
     ],
     notes: [
-      "BrowserRouter — wraps your entire app and provides routing context.",
-      "Routes + Route — Route path='/about' element={About} renders About when URL is /about.",
-      "Link — use instead of anchor tags for internal navigation (no page reload).",
-      "useNavigate() — navigate programmatically, e.g. after a form submit.",
-      "useParams() — read dynamic URL segments: path='/users/:id' → const { id } = useParams().",
-      "Route path='*' — catch-all 404 route, always put it last inside Routes.",
+      "npm install mongoose",
+      "mongoose.connect(uri) → connect to MongoDB. Use MONGO_URI in .env.",
+      "new mongoose.Schema({ field: Type }) → define document shape.",
+      "mongoose.model('Name', schema) → creates the Model class. Collection = lowercase plural of Name.",
+      "Model.find() → all. Model.findById(id) → one. Model.create(data) → insert. Model.findByIdAndUpdate(id, data, { new: true }) → update, return new doc.",
+      "Always use await — all Mongoose methods return Promises.",
+      "{ new: true } in findByIdAndUpdate → returns the updated document, not the old one.",
     ],
-    code: `// Live simulation of routing using only useState.
-// In your real Vite project, replace this with actual react-router-dom.
+    code: `const mongoose = require('mongoose');
+require('dotenv').config();
+// npm install mongoose
 
-import { useState } from "react";
+// ── Connect ───────────────────────────────────
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('Connection error:', err));
 
-// Page components
-function HomePage()    { return <h2>🏠 Home Page</h2>; }
-function AboutPage()   { return <h2>ℹ️ About Page</h2>; }
-function UserPage({ id }) { return <h2>👤 User Profile — ID: {id}</h2>; }
-function NotFound()    { return <h2>❌ 404 — Not Found</h2>; }
+// ── Define Schema ─────────────────────────────
+const userSchema = new mongoose.Schema({
+  name:      { type: String,  required: true, trim: true },
+  email:     { type: String,  required: true, unique: true, lowercase: true },
+  age:       { type: Number,  min: 0 },
+  role:      { type: String,  enum: ['user', 'admin'], default: 'user' },
+  createdAt: { type: Date,    default: Date.now },
+});
 
-// Simulated router
-function App() {
-  const [route, setRoute] = useState("home");
+// ── Create Model ──────────────────────────────
+const User = mongoose.model('User', userSchema);
+// Collection name in MongoDB will be "users" (lowercase plural)
 
-  function navigate(to) { setRoute(to); }
+// ── CRUD operations ───────────────────────────
 
-  function renderPage() {
-    if (route === "home")    return <HomePage />;
-    if (route === "about")   return <AboutPage />;
-    if (route === "user-42") return <UserPage id="42" />;
-    return <NotFound />;
-  }
+// Create
+const newUser = await User.create({ name: 'Dev', email: 'dev@test.com', age: 22 });
 
-  return (
-    <div>
-      {/* Simulated <Link> buttons */}
-      <nav style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        {[
-          { label: "Home",     to: "home" },
-          { label: "About",    to: "about" },
-          { label: "User 42",  to: "user-42" },
-          { label: "Bad URL",  to: "xyz" },
-        ].map(({ label, to }) => (
-          <button key={to} onClick={() => navigate(to)}
-            style={{
-              padding: "6px 14px", borderRadius: 6, cursor: "pointer",
-              background: route === to ? "#34D399" : "#21262d",
-              color: "#fff", border: "none",
-            }}>
-            {label}
-          </button>
-        ))}
-      </nav>
+// Find all
+const allUsers = await User.find();
 
-      {/* Simulated <Routes> */}
-      {renderPage()}
+// Find with filter
+const admins = await User.find({ role: 'admin' });
 
-      <p style={{ color: "#8b949e", fontSize: 12, marginTop: 16 }}>
-        ↑ Concept demo only. Real setup uses BrowserRouter + Routes + Route + Link.
-      </p>
-    </div>
-  );
-}`,
+// Find one by ID
+const user = await User.findById('64abc123...');
+
+// Update (returns old by default — use { new: true } for updated doc)
+const updated = await User.findByIdAndUpdate(
+  '64abc123...',
+  { age: 23 },
+  { new: true }
+);
+
+// Delete
+const deleted = await User.findByIdAndDelete('64abc123...');`,
   },
   {
     id: 15,
-    emoji: "📌",
-    title: "useRef",
-    color: "#FB923C",
+    emoji: "✅",
+    title: "Input Validation",
+    color: "#F59E0B",
     theory: [
-      "useRef returns a mutable object with a .current property that persists across renders.",
-      "Unlike state, changing ref.current does NOT trigger a re-render.",
-      "The two main uses: 1) Accessing a DOM element directly. 2) Storing a value that persists between renders without causing re-renders.",
-      "Think of useRef as a box you can put anything in — React won't touch it or re-render because of it.",
+      "Never trust data coming from the client — always validate and sanitize on the server. Even if you have frontend validation, users can send raw HTTP requests that bypass it.",
+      "express-validator provides a chainable API for defining validation rules directly in your route — check for required fields, valid email format, minimum lengths, and more.",
+      "You add validation rules as middleware in the route array: [body('email').isEmail(), body('password').isLength({ min: 6 }), yourHandler]. These run before the handler.",
+      "In the handler, call validationResult(req) to collect any validation errors. If there are errors, return a 400 with the error list. If none, proceed.",
+      "express-validator can also sanitize — trim whitespace, convert to lowercase, escape HTML — reducing security risks alongside validation.",
     ],
     notes: [
-      "Attach ref={myRef} to a JSX element, then myRef.current gives you the actual DOM node.",
-      "Common DOM uses: focus an input, scroll to element, measure element size.",
-      "For storing interval IDs, previous values, or any mutable data without triggering re-renders.",
-      "useRef vs useState: state change causes re-render. Ref change does not.",
-      "Don't read or write refs during rendering — only inside event handlers or useEffect.",
+      "npm install express-validator",
+      "Import: const { body, param, query, validationResult } = require('express-validator')",
+      "body('field').notEmpty() → required. .isEmail() → valid email. .isLength({ min: 6 }) → min length.",
+      "body('field').trim().toLowerCase() → sanitize: trim spaces, lowercase.",
+      ".withMessage('Custom error msg') → custom error message for that rule.",
+      "validationResult(req).isEmpty() → true if no errors. .array() → list of errors.",
+      "param('id').isMongoId() → validates MongoDB ObjectId format in URL params.",
     ],
-    code: `import { useState, useRef, useEffect } from "react";
+    code: `const express = require('express');
+const { body, param, validationResult } = require('express-validator');
+// npm install express-validator
 
-// USE CASE 1: Direct DOM access — focus an input
-function AutoFocusInput() {
-  const inputRef = useRef(null);
+const app    = express();
+const router = express.Router();
+app.use(express.json());
 
-  return (
-    <div>
-      <input ref={inputRef} placeholder="Click button to focus me!" />
-      <button onClick={() => inputRef.current.focus()}>
-        Focus Input
-      </button>
-    </div>
-  );
-}
+// ── Validation rules as middleware array ─────
+const validateUser = [
+  body('name')
+    .trim()
+    .notEmpty().withMessage('Name is required')
+    .isLength({ min: 2 }).withMessage('Name must be at least 2 chars'),
 
-// USE CASE 2: Store interval ID without triggering re-renders
-function Stopwatch() {
-  const [time, setTime] = useState(0);
-  const [running, setRunning] = useState(false);
-  const intervalRef = useRef(null);
+  body('email')
+    .trim()
+    .notEmpty().withMessage('Email is required')
+    .isEmail().withMessage('Must be a valid email')
+    .normalizeEmail(), // sanitize: lowercase, remove dots in Gmail
 
-  function start() {
-    setRunning(true);
-    intervalRef.current = setInterval(() => {
-      setTime((t) => t + 1);
-    }, 1000);
+  body('password')
+    .notEmpty().withMessage('Password is required')
+    .isLength({ min: 6 }).withMessage('Password must be at least 6 chars'),
+
+  body('age')
+    .optional()
+    .isInt({ min: 0, max: 120 }).withMessage('Age must be 0–120'),
+];
+
+// ── Use in route ──────────────────────────────
+router.post('/users', validateUser, (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+    // errors.array() → [{ field: 'email', msg: 'Must be a valid email', value: 'bad' }]
   }
 
-  function stop() {
-    setRunning(false);
-    clearInterval(intervalRef.current);
+  // Data is valid — proceed
+  const { name, email, password } = req.body;
+  res.status(201).json({ message: 'User created', name, email });
+});
+
+// ── Validate URL param ────────────────────────
+router.get('/users/:id',
+  param('id').isMongoId().withMessage('Invalid user ID'),
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    res.json({ id: req.params.id });
   }
+);
 
-  return (
-    <div>
-      <p>Time: {time}s</p>
-      <button onClick={start} disabled={running}>Start</button>{" "}
-      <button onClick={stop} disabled={!running}>Stop</button>
-    </div>
-  );
-}
-
-// USE CASE 3: Track previous state value
-function PreviousValue() {
-  const [count, setCount] = useState(0);
-  const prevRef = useRef(0);
-
-  useEffect(() => {
-    prevRef.current = count; // runs after render
-  });
-
-  return (
-    <div>
-      <p>Current: {count} | Previous: {prevRef.current}</p>
-      <button onClick={() => setCount((c) => c + 1)}>+1</button>
-    </div>
-  );
-}`,
+app.use('/api', router);
+app.listen(3000);`,
   },
   {
     id: 16,
-    emoji: "🌐",
-    title: "useContext",
-    color: "#F472B6",
+    emoji: "🗜️",
+    title: "Async Handlers & Error Wrapping",
+    color: "#8B5CF6",
     theory: [
-      "Context solves prop drilling — when you have to pass props through many intermediate components just to reach a deeply nested child.",
-      "useContext lets any component in the tree read a shared value without explicitly passing it as a prop at every level.",
-      "Think of it like a global variable for a component tree — but safe and React-aware.",
-      "Context has two parts: a Provider (holds and broadcasts the value) and consumers (components that read it with useContext).",
+      "In Express 4, unhandled promise rejections in async route handlers do NOT automatically trigger the error handling middleware — they just crash silently or leave the request hanging.",
+      "The standard solution is wrapping every async handler in try/catch and calling next(err) in the catch block. This is repetitive but reliable.",
+      "A cleaner alternative is creating a wrapper function (asyncHandler or catchAsync) that wraps any async function and automatically passes rejections to next(err).",
+      "Express 5 (currently in beta) fixes this — async route handlers that throw or reject will automatically call next(err). Until then, wrap them manually or use the express-async-errors package.",
+      "The express-async-errors package monkey-patches Express so that any unhandled rejection in async routes automatically goes to the error handler — zero code change needed.",
     ],
     notes: [
-      "createContext(defaultValue) — creates the context object.",
-      "ThemeContext.Provider value={...} — wraps the subtree; all descendants can now read the value.",
-      "useContext(ThemeContext) — reads the nearest Provider's value inside any child component.",
-      "When the Provider's value changes, all consumers automatically re-render.",
-      "Best for truly global data: theme, auth user, language. Don't use it for everything.",
-      "For complex state, combine Context with useReducer instead of useState.",
+      "Express 4: async errors NOT auto-forwarded. Express 5: async errors auto-forwarded.",
+      "Pattern 1: try/catch in every handler → next(err) in catch.",
+      "Pattern 2: asyncHandler wrapper → const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)",
+      "npm install express-async-errors → require('express-async-errors') at top of server.js → done.",
+      "Always keep a global error handler as a safety net even with async wrappers.",
+      "next(err) skips all normal middleware and routes, jumping directly to the error handler.",
     ],
-    code: `import { useState, useContext, createContext } from "react";
-
-// Step 1: Create the context
-const ThemeContext = createContext("light");
-
-// Step 2: Custom hook — wraps useContext for convenience
-function useTheme() {
-  return useContext(ThemeContext);
-}
-
-// Deep child — zero prop drilling needed
-function ThemedButton() {
-  const { theme, toggleTheme } = useTheme();
-  return (
-    <button onClick={toggleTheme} style={{
-      background: theme === "dark" ? "#333" : "#eee",
-      color:      theme === "dark" ? "#fff" : "#333",
-      border: "1px solid currentColor",
-      padding: "8px 16px",
-      borderRadius: "6px",
-      cursor: "pointer",
-    }}>
-      Theme: {theme} — click to toggle
-    </button>
-  );
-}
-
-function ThemeLabel() {
-  const { theme } = useTheme();
-  return <p>App is in <strong>{theme}</strong> mode</p>;
-}
-
-// Intermediate — doesn't touch theme at all
-function Toolbar() {
-  return <div><ThemedButton /><ThemeLabel /></div>;
-}
-
-// Step 3: Provider owns the state and wraps the tree
-function App() {
-  const [theme, setTheme] = useState("light");
-  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
-
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <h2>useContext Demo</h2>
-      <Toolbar />
-    </ThemeContext.Provider>
-  );
-}`,
-  },
-  {
-    id: 17,
-    emoji: "🪝",
-    title: "Custom Hooks",
-    color: "#38BDF8",
-    theory: [
-      "A custom hook is just a JavaScript function whose name starts with 'use' and can call other hooks inside it.",
-      "Custom hooks let you extract reusable stateful logic out of components and share it across the app.",
-      "They do not share state — each component that calls a custom hook gets its own isolated copy.",
-      "Think of them as building your own hook library, tailored to your app's specific needs.",
-    ],
-    notes: [
-      "Name must start with 'use' — this is how React enforces hook rules on your function.",
-      "Can use any built-in hooks inside: useState, useEffect, useRef, useContext, etc.",
-      "Each component calling the same custom hook gets fully independent state.",
-      "Great use cases: data fetching, form handling, local storage, window size, debouncing.",
-      "Extract into a custom hook when you find the same useState + useEffect combo in multiple places.",
-    ],
-    code: `import { useState, useEffect } from "react";
-
-// ---- useFetch: reusable data fetching ----
-function useFetch(url) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    setLoading(true);
-    fetch(url)
-      .then((res) => res.json())
-      .then((json) => { setData(json); setLoading(false); })
-      .catch((err) => { setError(err); setLoading(false); });
-  }, [url]);
-
-  return { data, loading, error };
-}
-
-// Component stays clean — no fetch logic inside
-function UserCard() {
-  const { data: user, loading, error } = useFetch(
-    "https://jsonplaceholder.typicode.com/users/1"
-  );
-  if (loading) return <p>Loading...</p>;
-  if (error)   return <p>Error!</p>;
-  return <h3>{user?.name}</h3>;
-}
-
-// ---- useToggle: reusable boolean flip ----
-function useToggle(initial = false) {
-  const [value, setValue] = useState(initial);
-  const toggle = () => setValue((v) => !v);
-  return [value, toggle];
-}
-
-function ToggleDemo() {
-  const [isOpen, toggle] = useToggle(false);
-  return (
-    <div>
-      <button onClick={toggle}>{isOpen ? "Close ▲" : "Open ▼"}</button>
-      {isOpen && <p>Panel content!</p>}
-    </div>
-  );
-}
-
-// ---- useWindowSize: track browser dimensions ----
-function useWindowSize() {
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  useEffect(() => {
-    const update = () =>
-      setSize({ width: window.innerWidth, height: window.innerHeight });
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-  return size;
-}`,
-  },
-  {
-    id: 18,
-    emoji: "🛡️",
-    title: "Error Boundaries",
-    color: "#FBBF24",
-    theory: [
-      "Error boundaries catch JavaScript errors anywhere in their child component tree and show a fallback UI instead of crashing the whole app.",
-      "Without error boundaries, one broken component crashes your entire app — error boundaries contain the damage to just that section.",
-      "Think of them like try/catch, but for React component rendering.",
-      "Error boundaries must be class components — it's one of the few remaining cases you need a class in modern React.",
-    ],
-    notes: [
-      "Error boundaries catch errors during: rendering, lifecycle methods, and constructors of child components.",
-      "They do NOT catch: errors in event handlers (use regular try/catch there) or async code.",
-      "getDerivedStateFromError — update state here to show the fallback UI when a child throws.",
-      "componentDidCatch — called after the error; good place to log errors to a reporting service.",
-      "Place boundaries around individual sections, not just one at the very top of the app.",
-      "Click Try Again in the demo below to reset the boundary after a crash.",
-    ],
-    code: `import { Component, useState } from "react";
-
-// Class-based Error Boundary
-class ErrorBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
+    code: `// ── Pattern 1: Manual try/catch (verbose) ────
+app.get('/users/:id', async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'Not found' });
+    res.json(user);
+  } catch (err) {
+    next(err); // forward to error handler
   }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error, info) {
-    console.error("Boundary caught:", error, info.componentStack);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{ padding: 16, background: "#2d1515",
-                      border: "1px solid #FF6B6B", borderRadius: 8 }}>
-          <h3>😵 Something went wrong.</h3>
-          <p style={{ color: "#FF6B6B" }}>{this.state.error?.message}</p>
-          <button onClick={() => this.setState({ hasError: false, error: null })}>
-            Try Again
-          </button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
-
-// Intentionally buggy component
-function BuggyCounter() {
-  const [count, setCount] = useState(0);
-  if (count === 3) throw new Error("Crashed at count 3!");
-  return (
-    <div>
-      <p>Count: {count} — crashes at 3</p>
-      <button onClick={() => setCount((c) => c + 1)}>+1</button>
-    </div>
-  );
-}
-
-// App — boundary contains the crash to one section
-function App() {
-  return (
-    <div>
-      <h2>Error Boundary Demo</h2>
-      <ErrorBoundary>
-        <BuggyCounter />
-      </ErrorBoundary>
-      <p style={{ color: "#34D399", marginTop: 12 }}>
-        This line is outside the boundary — still works even when above crashes.
-      </p>
-    </div>
-  );
-}`,
-  },
-];
-
-// ─── Topics 19–30 data ───────────────────────────────────────────────────────
-const topics1930 = [
-  {
-    id: 19,
-    emoji: "⚙️",
-    title: "useReducer",
-    color: "#61DAFB",
-    theory: [
-      "useReducer is an alternative to useState for managing complex state logic inside a component.",
-      "Instead of calling a setter directly, you dispatch an action object, and a reducer function decides how state changes based on that action.",
-      "This is the same pattern Redux uses — useReducer is basically a built-in mini-Redux.",
-      "Use useReducer when state has multiple sub-values, or when the next state depends on the previous one in complex ways.",
-    ],
-    notes: [
-      "useReducer(reducer, initialState) returns [state, dispatch].",
-      "reducer is a pure function: (state, action) => newState. Never mutate state directly inside it.",
-      "dispatch({ type: 'INCREMENT' }) — you send an action, the reducer decides the outcome.",
-      "Actions usually have a type string and optionally a payload: { type: 'ADD', payload: 'text' }.",
-      "Rule of thumb: 3+ related state values or complex transitions → prefer useReducer over useState.",
-    ],
-    code: `import { useReducer, useState } from "react";
-
-function counterReducer(state, action) {
-  switch (action.type) {
-    case "INCREMENT": return { count: state.count + 1 };
-    case "DECREMENT": return { count: state.count - 1 };
-    case "RESET":     return { count: 0 };
-    case "SET":       return { count: action.payload };
-    default:          return state;
-  }
-}
-
-function Counter() {
-  const [state, dispatch] = useReducer(counterReducer, { count: 0 });
-  return (
-    <div>
-      <p>Count: {state.count}</p>
-      <button onClick={() => dispatch({ type: "INCREMENT" })}>+1</button>
-      <button onClick={() => dispatch({ type: "DECREMENT" })}>-1</button>
-      <button onClick={() => dispatch({ type: "RESET" })}>Reset</button>
-      <button onClick={() => dispatch({ type: "SET", payload: 100 })}>Set 100</button>
-    </div>
-  );
-}
-
-function todoReducer(state, action) {
-  switch (action.type) {
-    case "ADD":
-      return [...state, { id: Date.now(), text: action.payload, done: false }];
-    case "TOGGLE":
-      return state.map((t) =>
-        t.id === action.payload ? { ...t, done: !t.done } : t
-      );
-    case "DELETE":
-      return state.filter((t) => t.id !== action.payload);
-    default:
-      return state;
-  }
-}
-
-function TodoApp() {
-  const [todos, dispatch] = useReducer(todoReducer, []);
-  const [input, setInput] = useState("");
-
-  function add() {
-    if (!input.trim()) return;
-    dispatch({ type: "ADD", payload: input });
-    setInput("");
-  }
-
-  return (
-    <div>
-      <input value={input} onChange={(e) => setInput(e.target.value)} />
-      <button onClick={add}>Add</button>
-      <ul>
-        {todos.map((t) => (
-          <li key={t.id} style={{ textDecoration: t.done ? "line-through" : "none" }}>
-            {t.text}
-            <button onClick={() => dispatch({ type: "TOGGLE", payload: t.id })}>✓</button>
-            <button onClick={() => dispatch({ type: "DELETE", payload: t.id })}>✕</button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}`,
-  },
-  {
-    id: 20,
-    emoji: "⚡",
-    title: "useMemo & useCallback",
-    color: "#F7DF1E",
-    theory: [
-      "useMemo and useCallback are performance optimization hooks that prevent expensive recalculations and function recreation on every render.",
-      "useMemo memoizes a computed value — only recalculates when its dependencies change.",
-      "useCallback memoizes a function reference — only creates a new function when its dependencies change.",
-      "Important: do not use these everywhere. Memoization has its own cost. Only add them after identifying a real performance problem.",
-    ],
-    notes: [
-      "useMemo(() => expensiveCalc(), [dep]) — recalculates only when dep changes.",
-      "useCallback(() => myFn(), [dep]) — returns the same function reference unless dep changes.",
-      "Main use for useCallback: pass stable functions to children wrapped in React.memo.",
-      "Main use for useMemo: expensive computations like filtering or sorting large arrays.",
-      "If your app feels fast without them — skip them. Premature optimization is the root of all evil.",
-    ],
-    code: `import { useState, useMemo, useCallback, memo } from "react";
-
-// --- useMemo: skip expensive recomputation ---
-function FilteredList({ items, filter }) {
-  const filtered = useMemo(() => {
-    console.log("Filtering...");
-    return items.filter((item) =>
-      item.toLowerCase().includes(filter.toLowerCase())
-    );
-  }, [items, filter]);
-
-  return <ul>{filtered.map((x, i) => <li key={i}>{x}</li>)}</ul>;
-}
-
-// --- useCallback: stable function reference ---
-const ChildButton = memo(function ChildButton({ onClick, label }) {
-  console.log("Child rendered:", label);
-  return <button onClick={onClick}>{label}</button>;
 });
 
-function Parent() {
-  const [count, setCount] = useState(0);
-  const [other, setOther] = useState(0);
+// ── Pattern 2: asyncHandler wrapper (clean) ──
+// Define once, reuse everywhere:
+const asyncHandler = (fn) => (req, res, next) =>
+  Promise.resolve(fn(req, res, next)).catch(next);
 
-  const handleIncrement = useCallback(() => {
-    setCount((c) => c + 1);
-  }, []);
-
-  return (
-    <div>
-      <p>Count: {count} | Other: {other}</p>
-      <ChildButton onClick={handleIncrement} label="Increment" />
-      <button onClick={() => setOther((o) => o + 1)}>
-        Change Other (child stays the same)
-      </button>
-    </div>
-  );
-}`,
-  },
-  {
-    id: 21,
-    emoji: "🧠",
-    title: "React.memo",
-    color: "#FF6B6B",
-    theory: [
-      "React.memo is a higher-order component that prevents a component from re-rendering if its props have not changed.",
-      "By default React re-renders a child whenever its parent re-renders — even if the child receives the exact same props.",
-      "React.memo does a shallow comparison of props. If references are the same, the render is skipped entirely.",
-      "memo only blocks re-renders caused by the parent. If the component's own state or context changes, it still re-renders.",
-    ],
-    notes: [
-      "Wrap a component: const MyComp = memo(function MyComp(props) { ... })",
-      "Shallow comparison checks object and function references — not deep equality.",
-      "For object or array props, memoize the value with useMemo. For function props, use useCallback.",
-      "Most useful when a component renders often, receives the same props often, and is expensive to render.",
-      "Do not wrap every component — the comparison itself costs something. Use where re-renders are provably wasteful.",
-    ],
-    code: `import { useState, memo } from "react";
-
-// Without memo — re-renders on every parent render
-function RegularChild({ name }) {
-  console.log("RegularChild rendered");
-  return <p>Regular: {name}</p>;
-}
-
-// With memo — only re-renders when name prop actually changes
-const MemoizedChild = memo(function MemoizedChild({ name }) {
-  console.log("MemoizedChild rendered");
-  return <p>Memoized: {name}</p>;
-});
-
-// Custom comparison — full control over when to re-render
-const SmartChild = memo(
-  function SmartChild({ id }) {
-    console.log("SmartChild rendered, id:", id);
-    return <p>Smart ID: {id}</p>;
-  },
-  (prev, next) => prev.id === next.id
-  // return true  -> skip re-render
-  // return false -> allow re-render
-);
-
-function Parent() {
-  const [count, setCount] = useState(0);
-  const [name] = useState("Devendra");
-
-  return (
-    <div>
-      <p>Parent count: {count}</p>
-      <button onClick={() => setCount((c) => c + 1)}>Re-render Parent</button>
-      <hr />
-      <RegularChild name={name} />   {/* always re-renders */}
-      <MemoizedChild name={name} />  {/* skips — name unchanged */}
-      <SmartChild id={42} />         {/* skips — id unchanged */}
-    </div>
-  );
-}`,
-  },
-  {
-    id: 22,
-    emoji: "✂️",
-    title: "Code Splitting & Lazy Loading",
-    color: "#A78BFA",
-    theory: [
-      "Code splitting breaks your app bundle into smaller chunks that download only when needed, rather than loading everything upfront.",
-      "React.lazy lets you dynamically import a component — its JS chunk is only fetched when the component first renders.",
-      "Suspense is the wrapper that shows a fallback UI while the lazy component chunk is downloading.",
-      "This massively improves initial load time — users only download the code for pages they actually visit.",
-    ],
-    notes: [
-      "const MyComp = lazy(() => import('./MyComp')) — dynamic import, loads the file on demand.",
-      "Always wrap lazy components in a Suspense boundary with a fallback prop.",
-      "Best split points: route-level pages, heavy feature sections, modals, data visualizations.",
-      "React.lazy only works with default exports from the imported module.",
-      "In production, Vite and Webpack automatically create separate .js chunk files per lazy import.",
-    ],
-    code: `import { useState, lazy, Suspense } from "react";
-
-// In a real project these live in separate files:
-// const HeavyChart   = lazy(() => import('./HeavyChart'));
-// const AdminPanel   = lazy(() => import('./AdminPanel'));
-
-// Simulated heavy components for this demo
-function HeavyChart()   { return <div>📊 Heavy Chart — loaded on demand</div>; }
-function AdminPanel()   { return <div>🔒 Admin Panel — loaded on demand</div>; }
-function UserSettings() { return <div>⚙️  Settings  — loaded on demand</div>; }
-
-function App() {
-  const [page, setPage] = useState(null);
-
-  return (
-    <div>
-      <nav style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <button onClick={() => setPage("chart")}>Chart</button>
-        <button onClick={() => setPage("admin")}>Admin</button>
-        <button onClick={() => setPage("settings")}>Settings</button>
-      </nav>
-
-      <Suspense fallback={<p>Loading component...</p>}>
-        {page === "chart"    && <HeavyChart />}
-        {page === "admin"    && <AdminPanel />}
-        {page === "settings" && <UserSettings />}
-      </Suspense>
-
-      {!page && (
-        <p style={{ color: "#8b949e" }}>
-          Click a button. In a real app each section is a
-          separate JS chunk — downloaded only on first visit.
-        </p>
-      )}
-    </div>
-  );
-}`,
-  },
-  {
-    id: 23,
-    emoji: "🌀",
-    title: "Portals",
-    color: "#34D399",
-    theory: [
-      "A Portal renders a component's output into a different DOM node than its parent, escaping the normal component hierarchy.",
-      "Normally a component renders inside its parent's DOM node. With a portal you can target any node — like document.body.",
-      "Most common use cases: modals, tooltips, and dropdowns that need to escape overflow:hidden or z-index stacking on a parent.",
-      "Even though a portal renders elsewhere in the DOM, it still behaves like a normal React child — events bubble through the React tree as expected.",
-    ],
-    notes: [
-      "createPortal(children, domNode) is a function from the core React library that renders children into domNode.",
-      "The target DOM node must exist first — usually document.body or a dedicated div in index.html.",
-      "Event bubbling follows the React component tree, NOT the real DOM tree — React events still work normally.",
-      "State and Context work fine inside portals — they remain part of the React component tree.",
-      "The demo below simulates portal behaviour with fixed positioning so you can see the concept live.",
-    ],
-    code: `import { useState } from "react";
-
-// Portal API (for your real project):
-//   createPortal(<YourModal />, document.body)
-// Renders YourModal into document.body instead of inside
-// the parent component — escaping overflow:hidden or z-index.
-
-// Working modal demo — simulates portal visual result
-function Modal({ isOpen, onClose, children }) {
-  if (!isOpen) return null;
-  return (
-    <div style={{
-      position: "fixed", inset: 0,
-      background: "rgba(0,0,0,0.6)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 1000,
-    }}>
-      <div style={{
-        background: "#161b22",
-        border: "1px solid #30363d",
-        borderRadius: 12, padding: 24, minWidth: 280,
-      }}>
-        {children}
-        <button onClick={onClose} style={{
-          marginTop: 16, padding: "8px 16px",
-          background: "#FF6B6B", color: "#fff",
-          border: "none", borderRadius: 6, cursor: "pointer",
-        }}>
-          Close
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function App() {
-  const [open, setOpen] = useState(false);
-  return (
-    <div style={{
-      overflow: "hidden",
-      border: "2px solid #FF6B6B",
-      padding: 16, borderRadius: 8,
-    }}>
-      <p>Parent has overflow:hidden — a real portal escapes it.</p>
-      <button onClick={() => setOpen(true)}>Open Modal</button>
-      <Modal isOpen={open} onClose={() => setOpen(false)}>
-        <h3>Modal via Portal</h3>
-        <p>In production: wrap this JSX in createPortal and it
-           renders directly into document.body.</p>
-      </Modal>
-    </div>
-  );
-}`,
-  },
-  {
-    id: 24,
-    emoji: "🔗",
-    title: "Compound Components",
-    color: "#FB923C",
-    theory: [
-      "Compound Components let a group of components share implicit state through Context — no prop threading required.",
-      "Think of HTML select and option tags — they work together without you wiring them. Compound components do the same in React.",
-      "A parent component owns the state and provides it via Context. Child components consume that context automatically.",
-      "This gives consumers a clean expressive API with no prop drilling and no awkward config objects.",
-    ],
-    notes: [
-      "The parent creates a Context and wraps children in a Provider.",
-      "Sub-components (Tab, Panel, Item) read shared state from Context instead of receiving it as props.",
-      "Attach sub-components to the parent as properties: Tabs.Tab, Tabs.Panel — one clean import for everything.",
-      "This is how popular headless UI libraries are built under the hood.",
-      "Best for: Tabs, Accordion, Select, Dropdown, Stepper — any set of components that logically belong together.",
-    ],
-    code: `import { useState, useContext, createContext } from "react";
-
-const TabsCtx = createContext(null);
-
-function Tabs({ children, defaultTab = 0 }) {
-  const [active, setActive] = useState(defaultTab);
-  return (
-    <TabsCtx.Provider value={{ active, setActive }}>
-      <div>{children}</div>
-    </TabsCtx.Provider>
-  );
-}
-
-function TabList({ children }) {
-  return (
-    <div style={{
-      display: "flex", gap: 4,
-      borderBottom: "2px solid #30363d", marginBottom: 16,
-    }}>
-      {children}
-    </div>
-  );
-}
-
-function Tab({ children, index }) {
-  const { active, setActive } = useContext(TabsCtx);
-  const on = active === index;
-  return (
-    <button onClick={() => setActive(index)} style={{
-      padding: "8px 16px", cursor: "pointer", fontFamily: "inherit",
-      background: on ? "#FB923C22" : "transparent",
-      color: on ? "#FB923C" : "#8b949e",
-      border: "none",
-      borderBottom: on ? "2px solid #FB923C" : "2px solid transparent",
-    }}>
-      {children}
-    </button>
-  );
-}
-
-function TabPanel({ children, index }) {
-  const { active } = useContext(TabsCtx);
-  return active === index ? <div>{children}</div> : null;
-}
-
-Tabs.TabList  = TabList;
-Tabs.Tab      = Tab;
-Tabs.TabPanel = TabPanel;
-
-function App() {
-  return (
-    <Tabs defaultTab={0}>
-      <Tabs.TabList>
-        <Tabs.Tab index={0}>Profile</Tabs.Tab>
-        <Tabs.Tab index={1}>Settings</Tabs.Tab>
-        <Tabs.Tab index={2}>Billing</Tabs.Tab>
-      </Tabs.TabList>
-      <Tabs.TabPanel index={0}><p>Profile content</p></Tabs.TabPanel>
-      <Tabs.TabPanel index={1}><p>Settings content</p></Tabs.TabPanel>
-      <Tabs.TabPanel index={2}><p>Billing content</p></Tabs.TabPanel>
-    </Tabs>
-  );
-}`,
-  },
-  {
-    id: 25,
-    emoji: "🎭",
-    title: "Render Props",
-    color: "#F472B6",
-    theory: [
-      "The Render Props pattern is when a component receives a function as a prop and calls it to decide what to render.",
-      "This lets you share stateful logic while giving the consumer full control over the UI output.",
-      "The component with the logic calls props.render(state) and passes its internal state as arguments.",
-      "Custom hooks have largely replaced render props — but the pattern still appears in many libraries and older codebases.",
-    ],
-    notes: [
-      "The render prop can be named anything: render, children, or any custom name.",
-      "Using children as the render prop is called the 'function as children' pattern.",
-      "Custom hooks are now preferred — same result, cleaner syntax, no extra nesting.",
-      "Both render props and custom hooks solve the same problem: sharing stateful logic between components.",
-      "You will encounter this pattern reading library source code, so knowing it is still valuable.",
-    ],
-    code: `import { useState } from "react";
-
-// MouseTracker owns the tracking logic.
-// The consumer decides what to display with that data.
-function MouseTracker({ render }) {
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  return (
-    <div
-      onMouseMove={(e) => setPos({ x: e.clientX, y: e.clientY })}
-      style={{ height: 90, border: "1px dashed #30363d", borderRadius: 8 }}
-    >
-      {render(pos)}
-    </div>
-  );
-}
-
-// Counter shares logic — consumer controls the UI shape
-function SharedCounter({ children }) {
-  const [count, setCount] = useState(0);
-  return children({
-    count,
-    increment: () => setCount((c) => c + 1),
-    decrement: () => setCount((c) => c - 1),
-    reset:     () => setCount(0),
-  });
-}
-
-function App() {
-  return (
-    <div>
-      <MouseTracker
-        render={({ x, y }) => (
-          <p style={{ padding: 12 }}>Mouse position: ({x}, {y})</p>
-        )}
-      />
-
-      <br />
-
-      <SharedCounter>
-        {({ count, increment, decrement, reset }) => (
-          <div>
-            <p>Count: {count}</p>
-            <button onClick={increment}>+</button>{" "}
-            <button onClick={decrement}>-</button>{" "}
-            <button onClick={reset}>Reset</button>
-          </div>
-        )}
-      </SharedCounter>
-    </div>
-  );
-}`,
-  },
-  {
-    id: 26,
-    emoji: "🗃️",
-    title: "State Management Libraries",
-    color: "#38BDF8",
-    theory: [
-      "For large apps, passing state via props or Context alone gets unwieldy. Dedicated state libraries provide a structured global store.",
-      "Zustand is the modern lightweight choice — minimal boilerplate, hooks-based API, no Provider setup needed.",
-      "Redux Toolkit is the official modern Redux — far simpler than classic Redux, dominant in enterprise projects.",
-      "Both solve the same core problem: a single global source of truth that any component can read and update.",
-    ],
-    notes: [
-      "Zustand: create a store with create(), then call it as a custom hook anywhere. No Provider required.",
-      "Redux Toolkit: createSlice bundles your reducer and actions. configureStore wires them. Wrap app in Provider.",
-      "useSelector reads from the Redux store. useDispatch sends actions to it.",
-      "Zustand is simpler and great for most projects. Use Redux Toolkit when the team already has it.",
-      "Other options worth knowing: Jotai (atomic state), MobX (reactive OOP style), Recoil (also atomic).",
-    ],
-    code: `// ── ZUSTAND ──────────────────────────────────
-// Create a store — call outside any component
-
-const useCounterStore = create((set) => ({
-  count: 0,
-  increment: () => set((s) => ({ count: s.count + 1 })),
-  decrement: () => set((s) => ({ count: s.count - 1 })),
-  reset:     () => set({ count: 0 }),
+// Now routes are clean — no try/catch needed
+app.get('/users/:id', asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) return res.status(404).json({ error: 'Not found' });
+  res.json(user);
 }));
 
-// Use the hook in any component — no Provider needed!
-function ZustandCounter() {
-  const { count, increment, decrement, reset } = useCounterStore();
-  return (
-    <div>
-      <p>Count: {count}</p>
-      <button onClick={increment}>+</button>
-      <button onClick={decrement}>-</button>
-      <button onClick={reset}>Reset</button>
-    </div>
-  );
-}
+app.post('/users', asyncHandler(async (req, res) => {
+  const user = await User.create(req.body);
+  res.status(201).json(user);
+}));
 
+// ── Pattern 3: express-async-errors (easiest) ──
+// npm install express-async-errors
+// At the very top of server.js:
+require('express-async-errors'); // patches Express — done!
 
-// ── REDUX TOOLKIT ─────────────────────────────
-// createSlice bundles reducer + actions together
-
-const counterSlice = createSlice({
-  name: "counter",
-  initialState: { value: 0 },
-  reducers: {
-    increment: (state) => { state.value += 1; },
-    decrement: (state) => { state.value -= 1; },
-    setTo:     (state, action) => { state.value = action.payload; },
-  },
+// Now async routes work like Express 5 — no wrappers needed:
+app.get('/posts', async (req, res) => {
+  const posts = await Post.find();  // throws? → auto goes to error handler
+  res.json(posts);
 });
 
-const store = configureStore({
-  reducer: { counter: counterSlice.reducer },
-});
-
-function RTKCounter() {
-  const count    = useSelector((state) => state.counter.value);
-  const dispatch = useDispatch();
-  return (
-    <div>
-      <p>{count}</p>
-      <button onClick={() => dispatch(counterSlice.actions.increment())}>+</button>
-      <button onClick={() => dispatch(counterSlice.actions.decrement())}>-</button>
-    </div>
-  );
-}
-
-function App() {
-  return (
-    <Provider store={store}>
-      <RTKCounter />
-    </Provider>
-  );
-}`,
-  },
-  {
-    id: 27,
-    emoji: "📡",
-    title: "Data Fetching Libraries",
-    color: "#FBBF24",
-    theory: [
-      "TanStack Query (also called React Query) is the gold standard for server state — it handles fetching, caching, background refetching, and sync automatically.",
-      "Server state is different from UI state — it can go stale, needs periodic sync, and is often shared across many components.",
-      "Without a library you write useEffect plus useState for every fetch and manage caching manually. TanStack Query does all of that in one hook.",
-      "SWR by Vercel is a lighter alternative with a similar API — a great fit for Next.js projects.",
-    ],
-    notes: [
-      "Install TanStack Query via npm, then wrap your app once in QueryClientProvider.",
-      "useQuery({ queryKey: ['users'], queryFn: fetchUsers }) — auto-handles loading, error, data, and caching.",
-      "queryKey is the cache identifier — same key anywhere in the app shares the same cached data.",
-      "useMutation handles POST/PUT/DELETE. Invalidate a queryKey after success to trigger a refetch.",
-      "By default data is cached and reused. Background refetch fires when the browser tab regains focus.",
-      "The DevTools package lets you inspect the full query cache visually in the browser.",
-    ],
-    code: `// TanStack Query setup (done once at app root):
-//   const qc = new QueryClient()
-//   <QueryClientProvider client={qc}><App /></QueryClientProvider>
-
-// Plain fetch helpers — no library required
-async function fetchUsers() {
-  const res = await fetch("https://jsonplaceholder.typicode.com/users");
-  return res.json();
-}
-
-async function addUser(data) {
-  const res = await fetch("https://jsonplaceholder.typicode.com/users", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  return res.json();
-}
-
-// useQuery: one hook replaces useEffect + useState + caching
-function UsersList() {
-  const client = useQueryClient();
-
-  const { data: users, isLoading, isError } = useQuery({
-    queryKey:  ["users"],    // unique cache key
-    queryFn:   fetchUsers,   // must return a promise
-    staleTime: 60 * 1000,    // data stays fresh for 60 s
-  });
-
-  // useMutation: handles write operations cleanly
-  const mutation = useMutation({
-    mutationFn: addUser,
-    onSuccess: () => {
-      // Mark users cache stale -> background refetch fires
-      client.invalidateQueries({ queryKey: ["users"] });
-    },
-  });
-
-  if (isLoading) return <p>Loading...</p>;
-  if (isError)   return <p>Error loading users</p>;
-
-  return (
-    <div>
-      <ul>
-        {users.slice(0, 3).map((u) => <li key={u.id}>{u.name}</li>)}
-      </ul>
-      <button onClick={() => mutation.mutate({ name: "New User" })}>
-        Add User
-      </button>
-    </div>
-  );
-}`,
-  },
-  {
-    id: 28,
-    emoji: "🔷",
-    title: "TypeScript with React",
-    color: "#61DAFB",
-    theory: [
-      "TypeScript adds static types to JavaScript — you describe the shape of your data and TypeScript catches mistakes at compile time before they become runtime bugs.",
-      "With React and TypeScript you type props, state, event handlers, and refs — getting autocomplete and editor errors for free.",
-      "TypeScript does not change how React works — it just adds a type layer on top. Your .jsx files become .tsx files.",
-      "Create a typed project: npm create vite@latest my-app -- --template react-ts",
-    ],
-    notes: [
-      "Type props with an interface: interface Props { name: string; age: number }",
-      "useState with a generic: const [count, setCount] = useState<number>(0)",
-      "Optional props use ?: interface Props { label?: string }",
-      "Event types: React.ChangeEvent<HTMLInputElement>, React.MouseEvent<HTMLButtonElement>",
-      "Children: React.ReactNode covers any valid JSX content passed between tags.",
-      "Refs: useRef<HTMLInputElement>(null) — always pass null as the initial value for DOM refs.",
-    ],
-    code: `// TypeScript React files use the .tsx extension
-
-// ── Typing Props ──
-interface ButtonProps {
-  label: string;
-  onClick: () => void;
-  variant?: "primary" | "danger";
-  disabled?: boolean;
-}
-
-function Button({ label, onClick, variant = "primary", disabled = false }: ButtonProps) {
-  return <button onClick={onClick} disabled={disabled}>{label}</button>;
-}
-
-// ── Typing useState ──
-const [count, setCount] = useState<number>(0);
-const [user,  setUser]  = useState<User | null>(null);
-const [items, setItems] = useState<string[]>([]);
-
-// ── Typing a data model ──
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: "admin" | "user" | "guest";
-}
-
-function UserCard({ user }: { user: User }) {
-  return (
-    <div>
-      <h3>{user.name}</h3>
-      <p>{user.email} — {user.role}</p>
-    </div>
-  );
-}
-
-// ── Typing event handlers ──
-function SearchInput() {
-  const [query, setQuery] = useState<string>("");
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setQuery(e.target.value);
-  }
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    console.log("Query:", query);
-  }
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input value={query} onChange={handleChange} />
-      <button type="submit">Search</button>
-    </form>
-  );
-}
-
-// ── Typing children ──
-interface CardProps {
-  title: string;
-  children: React.ReactNode;
-}
-function Card({ title, children }: CardProps) {
-  return <div><h2>{title}</h2>{children}</div>;
-}
-
-// ── Typing useRef ──
-const inputRef = useRef<HTMLInputElement>(null);
-inputRef.current?.focus();`,
-  },
-  {
-    id: 29,
-    emoji: "🧪",
-    title: "Testing React",
-    color: "#34D399",
-    theory: [
-      "React Testing Library (RTL) is the standard for testing React components — it tests from the user's perspective, not implementation details.",
-      "Core philosophy: test what the user sees and interacts with, not how internal state is structured.",
-      "Jest or Vitest acts as the test runner and assertion library. RTL provides render utilities and DOM queries on top.",
-      "Install the RTL packages as dev dependencies, then write test files alongside your components.",
-    ],
-    notes: [
-      "render(<Component />) — mounts the component into a virtual DOM for testing.",
-      "screen.getByText(), getByRole(), getByPlaceholderText() — query elements the way a real user would.",
-      "userEvent.click(), userEvent.type() — simulate realistic browser interactions.",
-      "Prefer userEvent over fireEvent — it fires all intermediate events like a real browser does.",
-      "screen.findBy* functions are async — they wait for elements to appear after async operations.",
-      "Never test internal state variables — test the visible output the user actually sees.",
-    ],
-    code: `// Tests live in files named ComponentName.test.jsx
-
-// ── Basic render test ──
-test("renders initial count of 0", () => {
-  render(<Counter />);
-  expect(screen.getByText("Count: 0")).toBeInTheDocument();
-});
-
-// ── Interaction test ──
-test("increments when + button is clicked", async () => {
-  const user = userEvent.setup();
-  render(<Counter />);
-
-  const btn = screen.getByRole("button", { name: "+" });
-  await user.click(btn);
-  await user.click(btn);
-
-  expect(screen.getByText("Count: 2")).toBeInTheDocument();
-});
-
-// ── Form validation test ──
-test("shows error when submitted empty", async () => {
-  const user = userEvent.setup();
-  render(<LoginForm />);
-
-  await user.click(screen.getByRole("button", { name: "Login" }));
-  expect(screen.getByText("Both fields are required.")).toBeInTheDocument();
-});
-
-// ── Mock function test ──
-test("calls onLogin with the entered credentials", async () => {
-  const user      = userEvent.setup();
-  const mockFn    = jest.fn();
-
-  render(<LoginForm onLogin={mockFn} />);
-
-  await user.type(screen.getByPlaceholderText("Email"),    "dev@email.com");
-  await user.type(screen.getByPlaceholderText("Password"), "secret123");
-  await user.click(screen.getByRole("button", { name: "Login" }));
-
-  expect(mockFn).toHaveBeenCalledWith({
-    email: "dev@email.com",
-    password: "secret123",
-  });
-});
-
-// ── Async data test ──
-test("shows user name after fetch completes", async () => {
-  render(<UserProfile userId={1} />);
-  const name = await screen.findByText("Leanne Graham");
-  expect(name).toBeInTheDocument();
+// ── Error handler (always keep this) ─────────
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ error: err.message || 'Server error' });
 });`,
   },
   {
-    id: 30,
-    emoji: "▲",
-    title: "Next.js",
-    color: "#ffffff",
+    id: 17,
+    emoji: "🚀",
+    title: "Project Structure & Best Practices",
+    color: "#EC4899",
     theory: [
-      "Next.js is a React framework that adds server-side rendering, file-based routing, API routes, and built-in optimisations on top of React.",
-      "With plain React (Vite), all rendering happens in the browser — the server sends an empty HTML shell. Next.js can render pages on the server for faster loads and better SEO.",
-      "The App Router (Next.js 13+) uses a folder-based routing system in the app/ directory — each folder maps to a URL segment automatically.",
-      "Create a project: npx create-next-app@latest my-app",
+      "A well-structured Express project separates concerns: routes define paths, controllers contain the logic, models define data shapes, and middleware handles cross-cutting concerns.",
+      "The MVC (Model-View-Controller) pattern is common in Express: Models are Mongoose schemas, Controllers are functions with req/res logic, Views are templates (or a frontend app).",
+      "Controllers are plain JavaScript functions that hold route handler logic. Separating them from routes keeps files small and makes testing easier.",
+      "Services are an optional but powerful layer below controllers — they contain pure business logic with no req/res — making them easily unit-testable.",
+      "Always use a consistent response format across your API. Wrapping responses in { success: true, data: ... } or { success: false, error: ... } makes the API predictable for frontend consumers.",
     ],
     notes: [
-      "app/page.jsx = /   |   app/about/page.jsx = /about   |   app/blog/[id]/page.jsx = /blog/42",
-      "Server Components (default) — run on the server, no useState or useEffect allowed inside.",
-      "Client Components — add 'use client' at the very top of the file to enable hooks and browser APIs.",
-      "Next.js provides a Link component for client-side navigation without a full page reload.",
-      "Next.js provides an Image component with automatic optimisation, lazy loading, and responsive sizing.",
-      "API routes: app/api/users/route.js — export GET and POST functions to build backend endpoints.",
+      "routes/ → define paths + attach controllers. controllers/ → req/res logic. models/ → Mongoose schemas. middleware/ → reusable middleware.",
+      "Keep controllers thin: validate input, call a service or model, send response. No business logic.",
+      "Use a config/ folder for database connection, constants, etc.",
+      "Consistent error objects: create a custom AppError class with status and message.",
+      "Use a barrel index.js in each folder to re-export: import { userRoutes } from './routes'",
+      "nodemon for dev, pm2 for production process management.",
+      "Add a catch-all 404 route BEFORE the error handler, AFTER all other routes.",
     ],
-    code: `// Create project: npx create-next-app@latest my-app
+    code: `// Recommended folder structure:
+// ├── server.js          ← entry: setup + start
+// ├── app.js             ← express app setup (middleware + routes)
+// ├── routes/
+// │   └── users.js       ← just paths + controller references
+// ├── controllers/
+// │   └── userController.js  ← req/res logic
+// ├── models/
+// │   └── User.js        ← Mongoose schema + model
+// ├── middleware/
+// │   ├── auth.js        ← JWT verification
+// │   └── errorHandler.js
+// ├── config/
+// │   └── db.js          ← mongoose.connect()
+// └── .env
 
-// ── Folder structure ──────────────────────────
-// app/
-//   layout.jsx           root layout (wraps all pages)
-//   page.jsx             route: /
-//   about/
-//     page.jsx           route: /about
-//   blog/
-//     [id]/
-//       page.jsx         route: /blog/42
-//   api/
-//     users/
-//       route.js         API endpoint: /api/users
+// controllers/userController.js
+const User = require('../models/User');
 
-// ── app/layout.jsx ────────────────────────────
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
+exports.getUsers = async (req, res, next) => {
+  try {
+    const users = await User.find();
+    res.json({ success: true, data: users });
+  } catch (err) { next(err); }
+};
+
+exports.getUserById = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, error: 'Not found' });
+    res.json({ success: true, data: user });
+  } catch (err) { next(err); }
+};
+
+// routes/users.js
+const router = require('express').Router();
+const { getUsers, getUserById } = require('../controllers/userController');
+const protect = require('../middleware/auth');
+
+router.get('/',    protect, getUsers);
+router.get('/:id', protect, getUserById);
+
+module.exports = router;
+
+// app.js
+const express    = require('express');
+const cors       = require('cors');
+const helmet     = require('helmet');
+const usersRoute = require('./routes/users');
+
+const app = express();
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+app.use('/api/users', usersRoute);
+
+module.exports = app;`,
+  },
+  {
+    id: 18,
+    emoji: "🌍",
+    title: "Deployment",
+    color: "#06B6D4",
+    theory: [
+      "Before deploying, make sure your app uses process.env.PORT — hosting platforms (Heroku, Railway, Render) assign the port dynamically and set the PORT environment variable.",
+      "Add a start script to package.json: 'start': 'node server.js'. Hosting platforms run npm start to launch your app.",
+      "Never commit your .env file. Set environment variables in the hosting platform's dashboard. Platforms like Railway and Render have a dedicated environment variables section.",
+      "Use nodemon in development (npm run dev) but never in production — it restarts on file changes which is wasteful. Use node directly or pm2 for production.",
+      "Railway and Render are the easiest platforms for Express deployment — connect your GitHub repo, set env vars, and they auto-deploy on every push.",
+    ],
+    notes: [
+      "const PORT = process.env.PORT || 3000 → always use this pattern.",
+      "package.json scripts: 'start': 'node server.js', 'dev': 'nodemon server.js'",
+      "Set NODE_ENV=production on the hosting platform — enables optimizations.",
+      "Railway: connect GitHub → auto-detects Node.js → deploy. Add env vars in Variables tab.",
+      "Render: similar to Railway. Free tier available. Build command: npm install. Start: npm start.",
+      "pm2 for production: npm install -g pm2 → pm2 start server.js → pm2 startup (auto-restart on crash).",
+      "Add a health check route: app.get('/health', (req, res) => res.json({ status: 'ok' }))",
+    ],
+    code: `// package.json
+{
+  "name": "my-express-api",
+  "scripts": {
+    "start": "node server.js",       ← production
+    "dev":   "nodemon server.js"     ← development
+  }
 }
 
-// ── app/page.jsx (Server Component) ───────────
-// async function — runs on the server, fetches directly
-export default async function HomePage() {
-  const res  = await fetch("https://jsonplaceholder.typicode.com/users/1");
-  const user = await res.json();
-  return <h1>Hello, {user.name}</h1>;
-}
+// server.js — production-ready entry
+require('dotenv').config();
+const app  = require('./app');      // express app
+const connectDB = require('./config/db');
 
-// ── app/blog/[id]/page.jsx (dynamic route) ────
-export default async function BlogPost({ params }) {
-  const { id } = params;
-  const res  = await fetch("https://jsonplaceholder.typicode.com/posts/" + id);
-  const post = await res.json();
-  return <article><h1>{post.title}</h1><p>{post.body}</p></article>;
-}
+const PORT = process.env.PORT || 3000;
 
-// ── Client Component (needs hooks) ────────────
-"use client";  // must be the very first line
+// Connect DB, then start server
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(\`Server running on port \${PORT}\`);
+    console.log(\`Environment: \${process.env.NODE_ENV}\`);
+  });
+});
 
-export default function Navbar() {
-  const [open, setOpen] = useState(false);
-  return (
-    <nav>
-      {/* The Next.js Link component — no full page reload */}
-      <Link href="/">Home</Link>
-      <Link href="/about">About</Link>
-      <button onClick={() => setOpen(!open)}>Menu</button>
-    </nav>
-  );
-}
+// config/db.js
+const mongoose = require('mongoose');
 
-// ── app/api/users/route.js ─────────────────────
-export async function GET() {
-  return Response.json([{ id: 1, name: "Devendra" }]);
-}
+module.exports = async function connectDB() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('MongoDB connected');
+  } catch (err) {
+    console.error('DB connection failed:', err.message);
+    process.exit(1); // exit if DB fails — no point running
+  }
+};
 
-export async function POST(request) {
-  const body = await request.json();
-  return Response.json({ created: true, data: body });
-}`,
+// Health check route (add in app.js)
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime() });
+});
+
+// .gitignore
+// node_modules/
+// .env`,
   },
 ];
 
-// ─── Interview Definitions data ──────────────────────────────────────────────
+// ─── Interview Categories ──────────────────────────────────────────────────────
 const interviewCategories = [
   {
     label: "Core Concepts",
     color: "#61DAFB",
-    emoji: "⚛️",
+    emoji: "🧠",
     terms: [
       {
-        term: "React",
-        simple: "A JavaScript library made by Meta for building user interfaces faster and more efficiently.",
-        technical: "React is a declarative, component-based JavaScript library for building UIs. It uses a Virtual DOM to minimize expensive real DOM operations by diffing changes and applying only what's needed. It follows a unidirectional data flow and separates UI into reusable components.",
-        tip: "Don't call it a framework — it's a library. Frameworks like Angular are opinionated and come with everything. React only handles the View layer.",
+        term: "What is Express.js?",
+        simple: "A minimal Node.js framework that makes building web servers and REST APIs fast and easy.",
+        technical: "Express.js is an unopinionated, minimal web framework built on top of Node.js's http module. It abstracts low-level HTTP parsing into a clean API: routing (app.get/post/etc), middleware (app.use), request parsing (req.body/params/query), and response helpers (res.json/send/status). It doesn't enforce folder structure or patterns — that's left to the developer.",
+        tip: "Interview answer: 'Express makes Node.js server code readable. Without it, you'd manually parse URLs, methods, and bodies in every request handler.'",
       },
       {
-        term: "SPA (Single Page Application)",
-        simple: "A web app that loads once and updates the content dynamically without refreshing the browser.",
-        technical: "An SPA loads a single HTML file on the first request. After that, JavaScript intercepts navigation, updates the URL via the History API, and re-renders components without a full page reload. React with React Router is a classic SPA setup.",
-        tip: "Downside of SPAs: poor SEO and slow initial load. That's why Next.js (SSR) was created.",
+        term: "What is Middleware?",
+        simple: "A function that runs between a request arriving and the route handler responding — used for logging, auth, parsing, etc.",
+        technical: "Middleware are functions with the signature (req, res, next). They can read/modify req and res, then call next() to pass control to the next function in the stack. If next() is not called and no response is sent, the request hangs. Middleware is registered with app.use() (global) or per route. Execution order matches registration order — middleware runs top-to-bottom.",
+        tip: "The most common interview question on Express. Key points: 3 params (req, res, next), must call next() to continue, order matters, app.use() = global.",
       },
       {
-        term: "Virtual DOM",
-        simple: "A lightweight copy of the real DOM that React uses to figure out what changed before updating the browser.",
-        technical: "The Virtual DOM is an in-memory JavaScript object tree that mirrors the real DOM. When state changes, React creates a new Virtual DOM tree, diffs it against the previous one (reconciliation), and batches only the minimal real DOM updates needed. This is far faster than re-rendering the entire page.",
-        tip: "Key interview answer: 'React never touches the real DOM directly — it updates the Virtual DOM first, calculates the diff, then commits the minimum changes.'",
+        term: "req vs res",
+        simple: "req (request) holds everything about the incoming request. res (response) is used to send data back to the client.",
+        technical: "req contains: req.params (URL segments), req.query (query string), req.body (parsed body, needs middleware), req.headers, req.method, req.url, req.ip, req.cookies. res contains methods for sending responses: res.json(), res.send(), res.status(), res.redirect(), res.sendFile(), res.set(), res.cookie(). Both are extended versions of Node's native IncomingMessage and ServerResponse.",
+        tip: "Common confusion: req.body is undefined until you add express.json() middleware. This is one of the most common beginner bugs.",
       },
       {
-        term: "Reconciliation",
-        simple: "The process React uses to compare the old and new Virtual DOM and decide what to update.",
-        technical: "When state or props change, React calls render to produce a new Virtual DOM tree. React then diffs this against the previous tree using its reconciliation algorithm. It uses keys to track list items, bails out on subtrees that haven't changed, and batches DOM mutations for performance.",
-        tip: "This is why the key prop matters in lists — without it React can't correctly identify which item changed.",
+        term: "app.use() vs app.get()",
+        simple: "app.use() registers middleware or mounts routers for all methods. app.get() registers a handler only for GET requests.",
+        technical: "app.use(path, fn) matches any HTTP method and any path that starts with the given prefix. app.get(path, fn) matches only exact GET requests to that path. app.use() is used for middleware and router mounting. app.get/post/put/delete/patch are used for route handlers. app.use('/api', router) mounts a router so all its routes are prefixed with /api.",
+        tip: "app.use() is 'catch everything starting with this path'. app.get() is 'only exact GET to this path'. Use app.use() for middleware; app.get/post for routes.",
       },
       {
-        term: "Component",
-        simple: "A reusable, self-contained piece of UI — like a LEGO block for your web page.",
-        technical: "A React component is a JavaScript function (or class) that accepts props as input and returns JSX describing what to render. Components encapsulate their own logic and UI, can hold local state, and can be composed together to build complex interfaces.",
-        tip: "Always start component names with a capital letter. React treats lowercase names as native HTML elements.",
-      },
-      {
-        term: "JSX",
-        simple: "A syntax that lets you write HTML-like code inside JavaScript.",
-        technical: "JSX (JavaScript XML) is syntactic sugar that gets compiled by Babel into React.createElement() calls. It is not HTML — it uses className instead of class, htmlFor instead of for, and all tags must be closed. JavaScript expressions go inside curly braces {}.",
-        tip: "JSX is optional — you could write React.createElement() manually — but nobody does.",
-      },
-      {
-        term: "Props",
-        simple: "Data passed from a parent component to a child component, like arguments to a function.",
-        technical: "Props (properties) are read-only inputs passed down the component tree. They enforce one-way data flow — data flows from parent to child only. A child component must never mutate its props. For two-way communication, parents pass callback functions as props.",
-        tip: "Props are immutable. If a child needs to change something, it should call a function prop passed from the parent.",
-      },
-      {
-        term: "State",
-        simple: "Data that belongs to a component and can change over time, triggering a re-render.",
-        technical: "State is mutable data managed inside a component using the useState hook. When state is updated via the setter function, React schedules a re-render of that component and its children. State updates may be batched for performance. Unlike props, state is private to the component.",
-        tip: "Props come from outside (parent). State lives inside the component itself. This is a very common interview question.",
-      },
-      {
-        term: "Reusability",
-        simple: "Writing a component once and using it in multiple places without rewriting the code.",
-        technical: "Reusability is achieved by building components that accept props to control their output, keeping them generic and composable. Custom hooks extend this to logic reuse. A well-designed reusable component has a clear API (props), no side effects hidden inside, and a single responsibility.",
-        tip: "Example: a Button component that accepts label, onClick, and variant props can be reused everywhere instead of rewriting button markup each time.",
+        term: "next() function",
+        simple: "A function that tells Express to move on to the next middleware or route handler in the stack.",
+        technical: "next() is the third argument passed to every middleware. Calling next() without arguments moves to the next middleware/route. Calling next(err) skips all normal middleware and routes and jumps directly to the error-handling middleware (the one with 4 args: err, req, res, next). If neither next() nor a response is sent, the client connection hangs indefinitely.",
+        tip: "next vs next(err): no arg = continue normally. With an error = jump to error handler. Forgetting next() in middleware is a very common bug — requests just hang.",
       },
     ],
   },
   {
-    label: "Hooks",
+    label: "Routing & Request",
     color: "#F7DF1E",
-    emoji: "🪝",
+    emoji: "🛣️",
     terms: [
       {
-        term: "Hooks",
-        simple: "Special functions that let you add React features like state and side effects to functional components.",
-        technical: "Hooks are functions prefixed with 'use' that allow functional components to opt into React features previously only available in class components. Introduced in React 16.8. They must be called at the top level of a component (not inside loops, conditions, or nested functions) to preserve call order between renders.",
-        tip: "The two rules of hooks: 1) Only call hooks at the top level. 2) Only call hooks from React functions.",
+        term: "Route Parameters (:param)",
+        simple: "Dynamic URL segments defined with a colon — like /users/:id — where the actual value is available as req.params.id.",
+        technical: "Route parameters are named URL segments prefixed with ':'. Express captures the value at that position and populates req.params. For /users/:id, a request to /users/42 gives req.params.id = '42' (always a string). Multiple params: /posts/:postId/comments/:commentId. Optional params: /users/:id?. Catch-all: /files/* → req.params[0].",
+        tip: "req.params values are always strings. Convert with Number() or parseInt() when expecting a number. forgetting the conversion is a common bug in comparisons.",
       },
       {
-        term: "useState",
-        simple: "A hook that adds a state variable to a component.",
-        technical: "useState(initialValue) returns a tuple [state, setState]. The state persists across renders. Calling setState schedules a re-render with the new value. State updates are asynchronous and may be batched. For updates based on previous state, use the functional form: setState(prev => prev + 1).",
-        tip: "Never mutate state directly (e.g. state.push()). Always use the setter function — otherwise React won't know to re-render.",
+        term: "Query Strings (req.query)",
+        simple: "Key-value pairs after the ? in a URL — like /search?q=express&limit=10 — available as req.query.q and req.query.limit.",
+        technical: "Query strings are parsed automatically by Express and made available as req.query — a plain object. All values are strings by default. Arrays are possible with ?color=red&color=blue → req.query.color = ['red', 'blue']. Use for: pagination (page, limit), filtering, search terms, sorting. Never use query params for sensitive data — they appear in server logs and browser history.",
+        tip: "req.params = path segments (/users/:id). req.query = ?after the path. req.body = request body (POST/PUT). Knowing which to use for what data is a core interview topic.",
       },
       {
-        term: "useEffect",
-        simple: "A hook for running side effects like fetching data, setting timers, or subscribing to events.",
-        technical: "useEffect(fn, deps) runs fn after the component renders. The dependency array controls when it re-runs: [] runs once on mount, [val] runs when val changes, and no array runs after every render. Return a cleanup function to cancel subscriptions or timers when the component unmounts.",
-        tip: "Common mistake: putting an async function directly inside useEffect. Define the async function inside and call it instead.",
+        term: "Request Body (req.body)",
+        simple: "The data sent in the body of a POST/PUT/PATCH request — like a form submission or JSON payload.",
+        technical: "HTTP requests can include a body (not for GET/DELETE). Express doesn't parse it by default — you must add middleware. express.json() parses application/json bodies and populates req.body. express.urlencoded() parses HTML form submissions. For multipart (file uploads), use multer. If body parsing middleware isn't added before the route, req.body is undefined.",
+        tip: "The single most common beginner bug: req.body is undefined. Cause: forgot app.use(express.json()) or put it after the route definition. Always register body parsers at the top.",
       },
       {
-        term: "useRef",
-        simple: "A hook that stores a mutable value that does NOT cause a re-render when changed.",
-        technical: "useRef returns a mutable ref object { current: value } that persists across renders. Unlike state, mutating .current does not trigger a re-render. Two main uses: 1) Accessing a DOM element directly (ref={myRef} on JSX). 2) Storing mutable values like interval IDs or previous state values.",
-        tip: "useRef vs useState: state change = re-render. Ref change = no re-render. Use ref for things React doesn't need to 'know about'.",
+        term: "Express Router",
+        simple: "A mini Express app that lets you define routes in a separate file, then mount them on the main app.",
+        technical: "express.Router() creates a router instance with its own middleware and route definitions. Export it with module.exports = router, then mount in app.js with app.use('/prefix', router). All routes in the router file are relative to the prefix. Router-level middleware (router.use()) applies only within that router. This is the standard way to organize an Express app by resource (users, posts, auth).",
+        tip: "Each Router file = one resource. routes/users.js handles /users. routes/posts.js handles /posts. This is what interviewers expect to see in a real project structure.",
       },
       {
-        term: "useContext",
-        simple: "A hook that lets any component read shared data without passing props through every level.",
-        technical: "useContext(MyContext) subscribes a component to the nearest matching Context Provider above it in the tree. When the Provider's value changes, all consuming components re-render. It solves prop drilling but shouldn't be overused — best for truly global data like theme, auth user, or locale.",
-        tip: "Context is not a state manager — it's a way to broadcast a value. For complex state, pair it with useReducer.",
-      },
-      {
-        term: "useReducer",
-        simple: "A hook for managing complex state using a reducer function, similar to how Redux works.",
-        technical: "useReducer(reducer, initialState) returns [state, dispatch]. You dispatch action objects ({ type, payload }) and the reducer — a pure function (state, action) => newState — computes the next state. Preferred over useState when state logic is complex, has multiple sub-values, or transitions depend on the previous state.",
-        tip: "useReducer is useState under the hood. Choose useReducer when your state logic has more than 2-3 related transitions.",
-      },
-      {
-        term: "useMemo",
-        simple: "A hook that caches the result of an expensive calculation so it isn't recalculated on every render.",
-        technical: "useMemo(() => compute(), deps) memoizes the return value of a function. React reuses the cached result across renders and only calls compute() again when one of the deps changes. Used to avoid expensive operations like sorting or filtering large arrays on every render.",
-        tip: "Don't overuse it. useMemo itself has overhead. Only use it when profiling shows an actual performance problem.",
-      },
-      {
-        term: "useCallback",
-        simple: "A hook that caches a function so it doesn't get recreated on every render.",
-        technical: "useCallback(fn, deps) returns a memoized version of fn. Without it, a new function reference is created on every render. This matters when passing callbacks to child components wrapped in React.memo — a new reference would force the child to re-render even if nothing changed.",
-        tip: "useCallback(fn, deps) is equivalent to useMemo(() => fn, deps). Both memoize — one for values, one for functions.",
-      },
-      {
-        term: "Custom Hooks",
-        simple: "Your own reusable hooks that extract stateful logic out of components.",
-        technical: "A custom hook is a JavaScript function whose name starts with 'use' that calls other hooks inside. Each component that calls a custom hook gets its own isolated state — hooks don't share state between callers. They allow logic reuse without changing component hierarchy.",
-        tip: "The 'use' prefix is required — it signals to React (and linters) that hook rules apply to this function.",
+        term: "HTTP Status Codes",
+        simple: "Numeric codes in HTTP responses that tell the client what happened — 200 = OK, 404 = not found, 500 = server error.",
+        technical: "2xx = success: 200 OK, 201 Created, 204 No Content. 3xx = redirect: 301 Permanent, 302 Temporary. 4xx = client error: 400 Bad Request (invalid input), 401 Unauthorized (not logged in), 403 Forbidden (logged in but no permission), 404 Not Found, 422 Unprocessable Entity (validation fail). 5xx = server error: 500 Internal Server Error. Set with res.status(code).json(body).",
+        tip: "Key distinction: 401 = not authenticated (no token / bad token). 403 = authenticated but not authorized (you're logged in but don't have permission). Mix these up and interviewers notice.",
       },
     ],
   },
   {
-    label: "Rendering & Performance",
+    label: "Middleware & Error",
     color: "#FF6B6B",
-    emoji: "🚀",
+    emoji: "🔗",
     terms: [
       {
-        term: "Re-render",
-        simple: "When React calls a component function again to produce an updated UI.",
-        technical: "A component re-renders when: 1) Its own state changes. 2) Its parent re-renders (even with same props). 3) A Context it subscribes to changes. React batches multiple state updates in the same event handler into a single re-render. Re-renders are cheap — only the Virtual DOM diff + minimal real DOM update.",
-        tip: "Re-renders are not bad by default. The real cost is unnecessary re-renders in expensive components.",
+        term: "Error Handling Middleware",
+        simple: "A special 4-argument middleware (err, req, res, next) that catches errors forwarded via next(err).",
+        technical: "Error handling middleware must have exactly 4 parameters: (err, req, res, next). Express detects the arity and treats it as an error handler. Register it after all routes and normal middleware. Trigger it by calling next(err) from any route or middleware — Express skips all normal handlers and jumps to the error middleware. Attach err.status and err.message to control the HTTP response.",
+        tip: "Two things trip people up: 1) Forgetting the 4th parameter (next) — Express won't treat it as an error handler. 2) Placing it before routes — errors will never reach it.",
       },
       {
-        term: "React.memo",
-        simple: "A wrapper that skips re-rendering a component if its props haven't changed.",
-        technical: "React.memo is a higher-order component that performs a shallow comparison of the component's props between renders. If all props are reference-equal, React reuses the last render output and skips calling the component function. A custom comparison function can be passed as the second argument.",
-        tip: "memo only prevents re-renders from the parent. The component still re-renders if its own state or context changes.",
+        term: "CORS",
+        simple: "A browser security mechanism that blocks requests from a different origin — the cors package tells browsers to allow your API.",
+        technical: "CORS (Cross-Origin Resource Sharing) is enforced by browsers. A frontend at http://localhost:5173 calling a backend at http://localhost:3000 is cross-origin. Without CORS headers, the browser blocks the response. The cors package adds Access-Control-Allow-Origin (and other headers) to responses. app.use(cors()) allows all origins. For production, restrict: cors({ origin: 'https://myapp.com' }).",
+        tip: "CORS is a browser restriction only. Postman, curl, and server-to-server calls are never blocked by CORS. 'Works in Postman but not in the browser' = CORS issue.",
       },
       {
-        term: "Lazy Loading",
-        simple: "Loading a component's code only when it's actually needed, not upfront.",
-        technical: "React.lazy(() => import('./Component')) creates a lazily loaded component. Its JavaScript bundle is only downloaded when the component first renders. Must be wrapped in a Suspense boundary that shows a fallback UI during loading. Dramatically reduces initial bundle size.",
-        tip: "Best used at the route level — each page loads only when the user navigates to it.",
+        term: "helmet",
+        simple: "A middleware that sets security-focused HTTP response headers to protect your app from common web attacks.",
+        technical: "helmet sets 11 HTTP headers by default: Content-Security-Policy, X-XSS-Protection, X-Frame-Options (prevent clickjacking), X-Content-Type-Options (prevent MIME sniffing), Strict-Transport-Security (HTTPS only), and more. app.use(helmet()) is a one-liner that closes common security gaps. Each header can be individually configured or disabled. Should be registered before routes.",
+        tip: "One line — app.use(helmet()) — fixes a dozen common security misconfigurations. Always include it in production. Interviewers appreciate seeing it in your setup.",
       },
       {
-        term: "Code Splitting",
-        simple: "Breaking your app's JavaScript into smaller files that load on demand.",
-        technical: "Code splitting uses dynamic import() to split a bundle into chunks. Vite and Webpack do this automatically for React.lazy imports. Instead of one large bundle, users download only the code needed for the current view. Reduces Time to Interactive (TTI) significantly for large apps.",
-        tip: "Code splitting and lazy loading go hand in hand. lazy() is how you trigger a split point in React.",
+        term: "morgan",
+        simple: "A logging middleware that prints a line to the console for every incoming request.",
+        technical: "morgan is a request logger middleware. npm install morgan. Formats: 'dev' (colorful: GET /users 200 5ms), 'combined' (Apache format with IP, user-agent — good for production logs), 'tiny' (minimal). app.use(morgan('dev')) registers it globally. Morgan logs after the response is sent, so it shows the actual status code and response time.",
+        tip: "Use 'dev' format during development for readable output. Switch to 'combined' in production if you want structured logs with IP and user-agent for security auditing.",
       },
       {
-        term: "Batching",
-        simple: "React grouping multiple state updates together and doing one re-render instead of many.",
-        technical: "React 18 introduced automatic batching — multiple setState calls inside event handlers, setTimeout, Promises, and native event listeners are all batched into a single re-render. Previously, only React event handlers were batched. Batching reduces render cycles and improves performance.",
-        tip: "Batching is automatic in React 18. In React 17 and earlier, updates inside async functions were NOT batched.",
+        term: "express.static()",
+        simple: "Built-in middleware that serves files directly from a folder without needing route handlers.",
+        technical: "express.static(root) builds a middleware that serves files from the root directory. For each request, it checks if a matching file exists in the root — if yes, it streams it directly. If not, it calls next(). app.use(express.static('public')) serves files at their natural path. A virtual prefix can be added: app.use('/files', express.static('public')). Commonly used to serve a built React app.",
+        tip: "For full-stack deployment: app.use(express.static('client/dist')) + a catch-all app.get('*', sendIndex) pattern makes Express serve your React SPA correctly, including direct URL access and React Router refreshes.",
       },
     ],
   },
   {
-    label: "Patterns & Architecture",
+    label: "Auth & Security",
     color: "#A78BFA",
+    emoji: "🔐",
+    terms: [
+      {
+        term: "JWT (JSON Web Token)",
+        simple: "A signed token issued by the server after login — the client sends it back with every request to prove identity.",
+        technical: "A JWT has three parts: header (algorithm), payload (claims like userId, role, expiry), and signature (HMAC of header+payload using a secret). It's base64-encoded, not encrypted — don't put sensitive data in the payload. jwt.sign(payload, secret, { expiresIn }) creates a token. jwt.verify(token, secret) validates and decodes it — throws if expired or tampered. Sent as: Authorization: Bearer <token>.",
+        tip: "Stateless = no session storage on the server. Any instance can verify the token if it has the secret. This is why JWTs scale well. Downside: can't invalidate a token before expiry without a denylist.",
+      },
+      {
+        term: "bcryptjs",
+        simple: "A library for hashing passwords so they're never stored as plain text in the database.",
+        technical: "bcrypt uses a one-way adaptive hashing algorithm with a salt (random bytes mixed in to prevent rainbow table attacks). bcrypt.hash(password, rounds) hashes with a cost factor (10–12 rounds is typical). bcrypt.compare(plaintext, hash) checks a login attempt — it hashes the input the same way and compares. The hash stores the salt internally so no separate storage is needed.",
+        tip: "Never store plain passwords. bcrypt.compare() is the only correct way to verify — don't hash and compare strings manually. A cost factor of 10 is the standard for most apps.",
+      },
+      {
+        term: "Auth Middleware Pattern",
+        simple: "A middleware function that verifies a JWT from the request header and attaches the user to req before the route handler runs.",
+        technical: "The protect/authenticate middleware reads the Authorization header, extracts the Bearer token, calls jwt.verify() to validate it. If valid, it attaches the decoded payload to req.user and calls next(). If invalid or missing, it returns 401. This middleware is then added to protected routes: router.get('/me', protect, getMe). It keeps auth logic in one place and reusable across all protected routes.",
+        tip: "req.user is the convention for attaching the authenticated user. Downstream handlers read req.user.id instead of repeating JWT verification. This is the standard pattern — know it cold.",
+      },
+      {
+        term: "Environment Variables",
+        simple: "Key-value pairs stored outside your code — accessed via process.env — used for secrets and config that changes between environments.",
+        technical: "Node.js exposes environment variables via process.env. The dotenv package reads a .env file at startup and populates process.env. .env files should never be committed to Git (add to .gitignore). On hosting platforms (Railway, Render, Heroku), set env vars through the dashboard instead. Common variables: PORT, NODE_ENV, MONGO_URI, JWT_SECRET. NEXT_PUBLIC_ prefix convention is Next.js-specific; plain Express uses no prefix.",
+        tip: "The two mistakes interviewers watch for: 1) hardcoding secrets in source code. 2) committing .env to Git. Always use .env + .gitignore + .env.example in your projects.",
+      },
+      {
+        term: "input Validation vs Sanitization",
+        simple: "Validation checks if data is correct (required, right format). Sanitization cleans it (trim spaces, escape HTML, lowercase).",
+        technical: "Validation rejects bad input before it reaches your database: isEmail(), isLength({ min: 8 }), notEmpty(). Sanitization transforms input to a safe canonical form: trim() removes whitespace, normalizeEmail() lowercases emails, escape() converts < > & to HTML entities (prevents XSS). express-validator chains both: body('email').trim().isEmail().normalizeEmail(). Always do both — validate structure, sanitize content.",
+        tip: "Rule: validate first (reject if wrong shape), sanitize before storage (clean what passes). Validation without sanitization is incomplete; you might store spaces or mixed-case emails that break comparisons.",
+      },
+    ],
+  },
+  {
+    label: "Architecture & Patterns",
+    color: "#34D399",
     emoji: "🏗️",
     terms: [
       {
-        term: "Lifting State Up",
-        simple: "Moving shared state to the closest common parent so sibling components can both access it.",
-        technical: "When two sibling components need to share state, the state is lifted to their nearest common ancestor. The parent owns the state and passes it down as props. Children communicate back up via callback functions passed as props. This maintains unidirectional data flow.",
-        tip: "This is the answer to: 'How do you share data between two sibling components?' in an interview.",
+        term: "MVC Pattern in Express",
+        simple: "Model-View-Controller: separate your code into data (models), logic (controllers), and routes (the view layer for APIs).",
+        technical: "In an Express REST API: Models are Mongoose schemas/classes that represent data and handle DB queries. Controllers are plain functions (exports.getUsers) that handle req/res logic — validate input, call models, send responses. Routes map URLs to controller functions. For APIs there's no View layer — the JSON response is the view. This separation keeps files small and responsibilities clear.",
+        tip: "Interviewers often ask about structure. Know this: routes/ (URL mapping), controllers/ (req/res logic), models/ (DB schema + methods), middleware/ (auth, validation), config/ (db connection, constants).",
       },
       {
-        term: "Prop Drilling",
-        simple: "Passing props through many intermediate components just to reach a deeply nested child.",
-        technical: "Prop drilling occurs when props are passed through multiple component layers that don't use them — they just pass them along to children. It makes components tightly coupled and hard to refactor. Solutions: Context API, state management libraries, or component composition.",
-        tip: "Prop drilling 2-3 levels deep is fine. More than that — consider Context or state management.",
+        term: "REST API Conventions",
+        simple: "Consistent rules for naming URLs and using HTTP methods — plural nouns, right HTTP verbs, correct status codes.",
+        technical: "REST conventions: use plural resource nouns (/users, /posts). Use HTTP verbs for actions: GET=read, POST=create, PUT=replace, PATCH=partial update, DELETE=delete. Nested resources: /users/:id/posts. Never put verbs in URLs (/getUser is wrong). Return 201 for creation, 204 for no-content deletion. Paginate large lists with ?page=1&limit=20. Version your API: /api/v1/users.",
+        tip: "A well-designed REST API is predictable. Given the resource name, any developer can guess the routes. This predictability is what 'RESTful' means in interviews.",
       },
       {
-        term: "Component Composition",
-        simple: "Building complex UIs by combining simple, reusable components instead of making one giant component.",
-        technical: "Composition uses the children prop or named slot props to build flexible, reusable wrapper components. A Card component doesn't need to know what it wraps — it just renders {children}. This avoids the need for class inheritance and keeps components loosely coupled and highly reusable.",
-        tip: "React favours composition over inheritance. You rarely need to extend components — compose them instead.",
+        term: "Async Error Handling",
+        simple: "Making sure errors in async route handlers reach the error middleware, since Express 4 doesn't catch them automatically.",
+        technical: "Express 4 doesn't catch unhandled promise rejections in async routes — they silently hang or crash. Solutions: 1) try/catch + next(err) in every handler. 2) asyncHandler wrapper: (fn) => (req,res,next) => Promise.resolve(fn(req,res,next)).catch(next). 3) require('express-async-errors') package that monkey-patches Express. Express 5 fixes this natively. The error then reaches the 4-argument error middleware.",
+        tip: "This is a very common interview topic. Know all three solutions. The asyncHandler wrapper pattern is clean and widely used — be able to write it from memory.",
       },
       {
-        term: "Controlled Component",
-        simple: "A form input whose value is controlled by React state, making React the single source of truth.",
-        technical: "In a controlled component, the input's value is set by state and every change fires an onChange handler that updates state. The DOM never holds the data — React does. This enables real-time validation, conditional disabling, and formatted input. The opposite is an uncontrolled component, where the DOM manages the value.",
-        tip: "Controlled: value={state} + onChange={handler}. Uncontrolled: uses useRef to read the value when needed.",
+        term: "Separation of Concerns",
+        simple: "Each file and function should have one clear job — routes just route, controllers just handle req/res, models just manage data.",
+        technical: "In a clean Express app: routes/users.js only imports controllers and defines paths — no logic. controllers/userController.js only reads req, calls services/models, sends res — no DB schema. models/User.js only defines the Mongoose schema and model — no req/res. middleware/auth.js only verifies JWT. This makes each file independently testable and replaceable without touching other layers.",
+        tip: "If your route file has database calls, or your model file has req.body, those are red flags for poor separation of concerns — a common code-review comment.",
       },
       {
-        term: "Higher-Order Component (HOC)",
-        simple: "A function that takes a component and returns a new component with added behavior.",
-        technical: "An HOC is a pattern where a function accepts a component as an argument and returns a new component that wraps it with additional props, logic, or behavior — without modifying the original. Examples: React.memo, connect() from Redux, withRouter. HOCs have largely been replaced by hooks in modern React.",
-        tip: "HOCs were the old way to share logic. Custom hooks are now the preferred approach — simpler and more composable.",
-      },
-      {
-        term: "Pure Component",
-        simple: "A component that always produces the same output for the same input and has no side effects.",
-        technical: "A pure component is referentially transparent — its render output depends only on its props and state, never on external mutable state or side effects. React.PureComponent (class) and React.memo (function) implement shallow prop comparison to skip re-renders when inputs haven't changed, leveraging the purity guarantee.",
-        tip: "Pure components are predictable, easy to test, and easy to optimize. Always aim to keep components pure.",
-      },
-      {
-        term: "Unidirectional Data Flow",
-        simple: "Data always flows in one direction in React: from parent to child via props.",
-        technical: "React enforces a single direction for data: parent components pass data down to children via props. Children cannot modify props — they communicate upward by calling callback functions received as props. This makes data flow predictable, debuggable, and easy to trace compared to two-way binding frameworks.",
-        tip: "This is the fundamental architecture of React. Understanding it deeply is essential for senior-level interviews.",
-      },
-    ],
-  },
-  {
-    label: "Advanced Concepts",
-    color: "#34D399",
-    emoji: "🔬",
-    terms: [
-      {
-        term: "Context API",
-        simple: "A built-in way to share data across the component tree without passing props at every level.",
-        technical: "Context provides a way to pass data through the component tree without explicit prop threading. createContext creates a context object. A Provider component wraps the subtree and broadcasts a value. Any descendant can call useContext to read that value and will re-render when it changes.",
-        tip: "Context is not a performance tool — every consumer re-renders on value change. For frequent updates, consider a dedicated state library.",
-      },
-      {
-        term: "Portals",
-        simple: "A way to render a component's output into a different part of the DOM outside its parent.",
-        technical: "Portals render children into a DOM node that exists outside the parent component's DOM hierarchy. Despite the different DOM location, the component remains a child in the React tree — events bubble normally, Context works, and lifecycle hooks behave as expected. Primarily used for modals, tooltips, and dropdowns.",
-        tip: "Portals solve the 'overflow:hidden parent trapping a modal' problem — the modal escapes the parent in the real DOM.",
-      },
-      {
-        term: "Error Boundary",
-        simple: "A component that catches JavaScript errors in its children and shows a fallback UI instead of crashing the app.",
-        technical: "Error boundaries are class components that implement getDerivedStateFromError (to show fallback UI) and/or componentDidCatch (to log errors). They catch errors during rendering, lifecycle methods, and constructors of child components — but NOT in event handlers (use try/catch there) or async code.",
-        tip: "Place error boundaries strategically around sections — not just one at the top — so one broken feature doesn't crash unrelated UI.",
-      },
-      {
-        term: "Suspense",
-        simple: "A component that shows a fallback UI while waiting for something — like a lazy-loaded component — to finish loading.",
-        technical: "Suspense catches components that 'suspend' (throw a Promise) and renders a fallback until they resolve. Currently used with React.lazy for code splitting and with data fetching libraries that support Suspense. React 18 expanded Suspense support for concurrent features like startTransition.",
-        tip: "Suspense is React's declarative way to handle async loading states — instead of writing isLoading checks manually.",
-      },
-      {
-        term: "Keys",
-        simple: "A unique identifier React uses to track items in a list across re-renders.",
-        technical: "Keys help React's reconciliation algorithm identify which items in a list have changed, been added, or removed. They must be unique among siblings. Using array index as key causes bugs when list order changes — use stable unique IDs from your data instead. Keys are not passed as props to the child component.",
-        tip: "Common bug: using index as key in sortable or filterable lists causes input values to appear on the wrong item after re-order.",
-      },
-      {
-        term: "Strict Mode",
-        simple: "A React tool that highlights potential problems in your app during development.",
-        technical: "React.StrictMode wraps your app in development mode only and intentionally double-invokes render functions and effects to detect side effects. It also warns about deprecated APIs and unexpected side effects. Has zero impact on production builds.",
-        tip: "Strict Mode is why useEffect seems to fire twice in development — it's intentional, to catch impure effects.",
-      },
-      {
-        term: "Concurrent Mode / Concurrent Features",
-        simple: "React's ability to work on multiple tasks at once and prioritize urgent updates over slower ones.",
-        technical: "Concurrent rendering (React 18+) allows React to pause, interrupt, and resume rendering work. startTransition marks updates as non-urgent so React can prioritize urgent updates (like typing) over slow ones (like filtering a large list). This prevents UI from feeling janky under heavy render load.",
-        tip: "useTransition and startTransition are the main APIs. If asked about React 18, mention concurrent features.",
+        term: "nodemon",
+        simple: "A development tool that automatically restarts your server whenever you save a file — no manual node restarts.",
+        technical: "nodemon is a CLI that wraps node and watches the file system for changes. When a .js (or configured) file changes, it kills and restarts the process. Install as a dev dependency: npm install -D nodemon. Add to package.json scripts: 'dev': 'nodemon server.js'. Never use nodemon in production — use node directly or pm2 for process management and auto-restart on crash.",
+        tip: "Always use the dev script pattern: 'start': 'node server.js' for production, 'dev': 'nodemon server.js' for development. Interviewers notice when devDependencies are in dependencies or nodemon is in start.",
       },
     ],
   },
 ];
 
-// ─── Shared layout styles ────────────────────────────────────────────────────
-const S = {
-  shell: { fontFamily: "'Fira Code','Courier New',monospace", background:"#0d1117", minHeight:"100vh", color:"#e6edf3" },
-  sidebar: { width:"220px", minWidth:"220px", background:"#161b22", borderRight:"1px solid #30363d", overflowY:"auto", padding:"16px 0" },
-  sidebarBtn: (active, color) => ({
-    display:"flex", alignItems:"center", gap:"10px", width:"100%",
-    padding:"10px 16px", background: active?"#21262d":"transparent", border:"none",
-    borderLeft: active?`3px solid ${color}`:"3px solid transparent",
-    color: active?"#e6edf3":"#8b949e", cursor:"pointer", textAlign:"left",
-    fontSize:"12px", transition:"all 0.15s",
-  }),
-};
+// ─── TopicViewer component ─────────────────────────────────────────────────────
+function TopicViewer({ topicList, sectionLabel, topicRange }) {
+  const [selected, setSelected] = useState(0);
+  const [tab, setTab]           = useState("theory");
+  const topic = topicList[selected];
 
-// ─── Navbar ──────────────────────────────────────────────────────────────────
-const NAV = [
-  { label:"🏠 Home",             path:"/" },
-  { label:"⚡ Quick Review",      path:"/quick-review" },
-  { label:"🟢 Basic 1–9",        path:"/basic" },
-  { label:"🟡 Intermediate 10–18",path:"/intermediate" },
-  { label:"🔴 Advanced 19–30",   path:"/advanced" },
-  { label:"🎯 Interview Defs",   path:"/interview" },
-];
-
-function Navbar() {
-  const loc = useLocation();
-  const [open, setOpen] = useState(false);
   return (
-    <nav style={{ position:"sticky",top:0,zIndex:200,background:"#161b22",
-                   borderBottom:"1px solid #30363d" }}>
-      <div style={{ maxWidth:1200,margin:"0 auto",padding:"0 1rem",
-                     height:56,display:"flex",alignItems:"center",justifyContent:"space-between" }}>
-        <Link to="/" style={{ color:"#61DAFB",textDecoration:"none",fontWeight:700,
-                                fontSize:"1.05rem",fontFamily:"'Fira Code',monospace" }}>
-          ⚛️ ReactNotes
-        </Link>
-        <div style={{ display:"flex",alignItems:"center",gap:"2px",flexWrap:"wrap" }}>
-          {NAV.map(({label,path})=>(
-            <Link key={path} to={path} style={{
-              color: loc.pathname===path?"#61DAFB":"#8b949e",
-              textDecoration:"none", padding:"5px 10px", borderRadius:6,
-              background: loc.pathname===path?"#21262d":"transparent",
-              fontSize:"11px", transition:"all 0.15s", fontFamily:"'Fira Code',monospace",
-            }}>{label}</Link>
-          ))}
-          <a href="https://github.com/YOUR_USERNAME" target="_blank" rel="noopener noreferrer"
-             style={{ marginLeft:8,color:"#0d1117",background:"#61DAFB",textDecoration:"none",
-                        padding:"5px 12px",borderRadius:6,fontSize:"11px",fontWeight:700 }}>
-            GitHub ↗
-          </a>
+    <div style={{ fontFamily:"'Fira Code','Courier New',monospace", background:"#0d1117", minHeight:"100vh", display:"flex", color:"#e6edf3" }}>
+      {/* Sidebar */}
+      <div style={{ width:"220px", minWidth:"220px", background:"#161b22", borderRight:"1px solid #30363d", overflowY:"auto", padding:"16px 0" }}>
+        <div style={{ padding:"0 16px 16px", borderBottom:"1px solid #30363d", marginBottom:"8px" }}>
+          <div style={{ fontSize:"11px", color:"#8b949e", letterSpacing:"2px", textTransform:"uppercase" }}>{sectionLabel}</div>
+          <div style={{ fontSize:"18px", fontWeight:"700", color:"#61DAFB", marginTop:"4px" }}>Topics {topicRange}</div>
         </div>
-      </div>
-    </nav>
-  );
-}
-
-// ─── Home ─────────────────────────────────────────────────────────────────────
-function Home() {
-  const cards = NAV.slice(1);
-  const descs = [
-    "All 30 topics at a glance — read in ~10 min",
-    "Topics 1–9: JSX, Props, State, Events, Lists",
-    "Topics 10–18: useEffect, Forms, Router, Context",
-    "Topics 19–30: useReducer, Memo, Next.js & more",
-    "Every React term explained simply + technically",
-  ];
-  return (
-    <main style={{ maxWidth:900,margin:"3rem auto",padding:"0 1.5rem",
-                     fontFamily:"'Fira Code',monospace" }}>
-      <h1 style={{fontSize:"2rem",color:"#e6edf3",marginBottom:".4rem"}}>⚛️ React Study Notes</h1>
-      <p style={{color:"#8b949e",marginBottom:"2.5rem"}}>30 topics · 5 sections · all in one place</p>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:"1rem"}}>
-        {cards.map(({label,path},i)=>(
-          <Link key={path} to={path} style={{
-            display:"flex",flexDirection:"column",gap:8,
-            background:"#161b22",border:"1px solid #30363d",
-            borderRadius:10,padding:"1.2rem 1.4rem",
-            color:"#e6edf3",textDecoration:"none",
-            transition:"border-color .2s",
+        {topicList.map((t, i) => (
+          <button key={t.id} onClick={() => { setSelected(i); setTab("theory"); }} style={{
+            display:"flex", alignItems:"center", gap:"10px", width:"100%",
+            padding:"10px 16px", background: selected===i ? "#21262d" : "transparent",
+            border:"none", borderLeft: selected===i ? `3px solid ${t.color}` : "3px solid transparent",
+            color: selected===i ? "#e6edf3" : "#8b949e", cursor:"pointer", textAlign:"left", fontSize:"12px", transition:"all 0.15s",
           }}>
-            <span style={{fontWeight:700,fontSize:"0.9rem"}}>&nbsp;{label}</span>
-            <span style={{color:"#8b949e",fontSize:"0.78rem",lineHeight:1.5}}>{descs[i]}</span>
-            <span style={{color:"#61DAFB",fontSize:"1.1rem",alignSelf:"flex-end"}}>→</span>
-          </Link>
+            <span style={{ fontSize:"16px" }}>{t.emoji}</span>
+            <span style={{ lineHeight:"1.3" }}>{t.id}. {t.title}</span>
+          </button>
         ))}
       </div>
-    </main>
+
+      {/* Main */}
+      <div style={{ flex:1, overflowY:"auto" }}>
+        <div style={{ padding:"28px 32px 20px", borderBottom:"1px solid #30363d", background:"#0d1117", position:"sticky", top:0, zIndex:10 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:"12px", marginBottom:"16px" }}>
+            <span style={{ fontSize:"28px" }}>{topic.emoji}</span>
+            <div>
+              <span style={{ fontSize:"11px", color:"#8b949e", letterSpacing:"1px" }}>TOPIC {topic.id} OF {topicList.length}</span>
+              <h1 style={{ margin:0, fontSize:"22px", color:topic.color }}>{topic.title}</h1>
+            </div>
+          </div>
+          <div style={{ display:"flex", gap:"4px" }}>
+            {["theory","notes","code"].map(t => (
+              <button key={t} onClick={() => setTab(t)} style={{
+                padding:"6px 16px", borderRadius:"6px", border:"1px solid",
+                borderColor: tab===t ? topic.color : "#30363d",
+                background:  tab===t ? topic.color+"22" : "transparent",
+                color:       tab===t ? topic.color : "#8b949e",
+                cursor:"pointer", fontSize:"12px", fontFamily:"inherit", textTransform:"capitalize", letterSpacing:"0.5px",
+              }}>
+                {t==="theory" ? "📖 Theory" : t==="notes" ? "📌 Notes" : "💻 Code"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ padding:"28px 32px" }}>
+          {tab==="theory" && topic.theory.map((point, i) => (
+            <div key={i} style={{ display:"flex", gap:"14px", marginBottom:"16px", padding:"16px", background:"#161b22", borderRadius:"10px", border:"1px solid #30363d", borderLeft:`3px solid ${topic.color}` }}>
+              <span style={{ color:topic.color, fontWeight:"bold", fontSize:"14px", minWidth:"20px" }}>{i+1}.</span>
+              <p style={{ margin:0, color:"#c9d1d9", lineHeight:"1.7", fontSize:"14px" }}>{point}</p>
+            </div>
+          ))}
+
+          {tab==="notes" && (
+            <div style={{ background:"#161b22", border:"1px solid #30363d", borderRadius:"10px", padding:"20px" }}>
+              {topic.notes.map((note, i) => (
+                <div key={i} style={{ display:"flex", gap:"10px", padding:"10px 0", borderBottom: i<topic.notes.length-1 ? "1px solid #21262d" : "none" }}>
+                  <span style={{ color:topic.color, fontSize:"16px" }}>→</span>
+                  <p style={{ margin:0, color:"#c9d1d9", lineHeight:"1.7", fontSize:"14px" }}>{note}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {tab==="code" && (
+            <div style={{ background:"#161b22", border:"1px solid #30363d", borderRadius:"10px", overflow:"hidden" }}>
+              <div style={{ background:"#21262d", padding:"10px 16px", display:"flex", alignItems:"center", gap:"8px", borderBottom:"1px solid #30363d" }}>
+                <span style={{ width:10, height:10, borderRadius:"50%", background:"#ff5f57", display:"inline-block" }} />
+                <span style={{ width:10, height:10, borderRadius:"50%", background:"#febc2e", display:"inline-block" }} />
+                <span style={{ width:10, height:10, borderRadius:"50%", background:"#28c840", display:"inline-block" }} />
+                <span style={{ fontSize:"12px", color:"#8b949e", marginLeft:"8px" }}>example.js</span>
+              </div>
+              <pre style={{ margin:0, padding:"20px", overflowX:"auto", fontSize:"13px", lineHeight:"1.8", color:"#e6edf3", whiteSpace:"pre-wrap", wordBreak:"break-word" }}>
+                <code>{topic.code}</code>
+              </pre>
+            </div>
+          )}
+        </div>
+
+        <div style={{ display:"flex", justifyContent:"space-between", padding:"20px 32px 32px", gap:"12px" }}>
+          <button onClick={() => { setSelected(Math.max(0,selected-1)); setTab("theory"); }} disabled={selected===0} style={{ padding:"10px 20px", borderRadius:"8px", border:"1px solid #30363d", background: selected===0?"#161b22":"#21262d", color: selected===0?"#484f58":"#c9d1d9", cursor: selected===0?"not-allowed":"pointer", fontSize:"13px", fontFamily:"inherit" }}>← Previous</button>
+          <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
+            {topicList.map((_,i) => (
+              <div key={i} onClick={() => { setSelected(i); setTab("theory"); }} style={{ width: selected===i?"20px":"8px", height:"8px", borderRadius:"4px", background: selected===i?topic.color:"#30363d", cursor:"pointer", transition:"all 0.2s" }} />
+            ))}
+          </div>
+          <button onClick={() => { setSelected(Math.min(topicList.length-1,selected+1)); setTab("theory"); }} disabled={selected===topicList.length-1} style={{ padding:"10px 20px", borderRadius:"8px", border:"1px solid #30363d", background: selected===topicList.length-1?"#161b22":"#21262d", color: selected===topicList.length-1?"#484f58":"#c9d1d9", cursor: selected===topicList.length-1?"not-allowed":"pointer", fontSize:"13px", fontFamily:"inherit" }}>Next →</button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -2538,657 +1611,64 @@ function Home() {
 function QuickReview() {
   const lines = quickReviewMD.split("\n");
   return (
-    <main style={{ maxWidth:820,margin:"2rem auto",padding:"0 1.5rem",
-                     fontFamily:"'Fira Code',monospace",color:"#e6edf3" }}>
+    <main style={{ maxWidth:820, margin:"2rem auto", padding:"0 1.5rem", fontFamily:"'Fira Code',monospace", color:"#e6edf3" }}>
       {lines.map((line, i) => {
-        if (line.startsWith("# "))  return <h1 key={i} style={{color:"#61DAFB",fontSize:"1.6rem"}}>&nbsp;{line.slice(2)}</h1>;
-        if (line.startsWith("## ")) return <h2 key={i} style={{color:"#F7DF1E",fontSize:"1.1rem",marginTop:"2rem",borderBottom:"1px solid #30363d",paddingBottom:6}}>&nbsp;{line.slice(3)}</h2>;
-        if (line.startsWith("### "))return <h3 key={i} style={{color:"#FF6B6B",fontSize:"0.95rem",marginTop:"1.2rem"}}>&nbsp;{line.slice(4)}</h3>;
-        if (line.startsWith("- ")) return <p key={i} style={{margin:"4px 0",color:"#c9d1d9",fontSize:"0.84rem",paddingLeft:12}}>→ {line.slice(2)}</p>;
-        if (line.startsWith("|")) return <p key={i} style={{fontFamily:"monospace",fontSize:"0.78rem",color:"#8b949e",margin:"2px 0"}}>&nbsp;{line}</p>;
-        if (line.trim()==="---") return <hr key={i} style={{borderColor:"#30363d",margin:"1rem 0"}}/>;
-        if (line.trim()==="") return <br key={i}/>;
-        return <p key={i} style={{color:"#c9d1d9",fontSize:"0.84rem",lineHeight:1.7,margin:"6px 0"}}>&nbsp;{line}</p>;
-      }}
-      }
+        if (line.startsWith("# "))   return <h1 key={i} style={{ color:"#61DAFB", fontSize:"1.6rem" }}>{line.slice(2)}</h1>;
+        if (line.startsWith("## "))  return <h2 key={i} style={{ color:"#F7DF1E", fontSize:"1.1rem", marginTop:"2rem", borderBottom:"1px solid #30363d", paddingBottom:6 }}>{line.slice(3)}</h2>;
+        if (line.startsWith("### ")) return <h3 key={i} style={{ color:"#FF6B6B", fontSize:"0.95rem", marginTop:"1.2rem" }}>{line.slice(4)}</h3>;
+        if (line.startsWith("- "))   return <p  key={i} style={{ margin:"4px 0", color:"#c9d1d9", fontSize:"0.84rem", paddingLeft:12 }}>→ {line.slice(2)}</p>;
+        if (line.trim()==="---")     return <hr key={i} style={{ borderColor:"#30363d", margin:"1rem 0" }} />;
+        if (line.trim()==="")        return <br key={i} />;
+        return <p key={i} style={{ color:"#c9d1d9", fontSize:"0.84rem", lineHeight:1.7, margin:"6px 0" }}>{line}</p>;
+      })}
     </main>
   );
 }
 
-// ─── Basic Notes (1–9) ────────────────────────────────────────────────────────
-export function BasicNotes() {
-  const [selected, setSelected] = useState(0);
-  const [tab, setTab] = useState("theory");
-
-  const topic = topics[selected];
-
-  return (
-    <div style={{
-      fontFamily: "'Fira Code', 'Courier New', monospace",
-      background: "#0d1117",
-      minHeight: "100vh",
-      display: "flex",
-      color: "#e6edf3",
-    }}>
-      {/* Sidebar */}
-      <div style={{
-        width: "220px",
-        minWidth: "220px",
-        background: "#161b22",
-        borderRight: "1px solid #30363d",
-        overflowY: "auto",
-        padding: "16px 0",
-      }}>
-        <div style={{
-          padding: "0 16px 16px",
-          borderBottom: "1px solid #30363d",
-          marginBottom: "8px",
-        }}>
-          <div style={{ fontSize: "11px", color: "#8b949e", letterSpacing: "2px", textTransform: "uppercase" }}>React Basics</div>
-          <div style={{ fontSize: "18px", fontWeight: "700", color: "#61DAFB", marginTop: "4px" }}>Topics 1–9</div>
-        </div>
-        {topics.map((t, i) => (
-          <button
-            key={t.id}
-            onClick={() => { setSelected(i); setTab("theory"); }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              width: "100%",
-              padding: "10px 16px",
-              background: selected === i ? "#21262d" : "transparent",
-              border: "none",
-              borderLeft: selected === i ? `3px solid ${t.color}` : "3px solid transparent",
-              color: selected === i ? "#e6edf3" : "#8b949e",
-              cursor: "pointer",
-              textAlign: "left",
-              fontSize: "12px",
-              transition: "all 0.15s",
-            }}
-          >
-            <span style={{ fontSize: "16px" }}>{t.emoji}</span>
-            <span style={{ lineHeight: "1.3" }}>{t.id}. {t.title}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Main Content */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
-        {/* Header */}
-        <div style={{
-          padding: "28px 32px 20px",
-          borderBottom: "1px solid #30363d",
-          background: "#0d1117",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-            <span style={{ fontSize: "28px" }}>{topic.emoji}</span>
-            <div>
-              <span style={{ fontSize: "11px", color: "#8b949e", letterSpacing: "1px" }}>TOPIC {topic.id} OF 9</span>
-              <h1 style={{ margin: 0, fontSize: "22px", color: topic.color }}>{topic.title}</h1>
-            </div>
-          </div>
-          {/* Tabs */}
-          <div style={{ display: "flex", gap: "4px" }}>
-            {["theory", "notes", "code"].map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                style={{
-                  padding: "6px 16px",
-                  borderRadius: "6px",
-                  border: "1px solid",
-                  borderColor: tab === t ? topic.color : "#30363d",
-                  background: tab === t ? topic.color + "22" : "transparent",
-                  color: tab === t ? topic.color : "#8b949e",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  fontFamily: "inherit",
-                  textTransform: "capitalize",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                {t === "theory" ? "📖 Theory" : t === "notes" ? "📌 Notes" : "💻 Code"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Content Area */}
-        <div style={{ padding: "28px 32px" }}>
-          {tab === "theory" && (
-            <div>
-              {topic.theory.map((point, i) => (
-                <div key={i} style={{
-                  display: "flex",
-                  gap: "14px",
-                  marginBottom: "16px",
-                  padding: "16px",
-                  background: "#161b22",
-                  borderRadius: "10px",
-                  border: "1px solid #30363d",
-                  borderLeft: `3px solid ${topic.color}`,
-                }}>
-                  <span style={{ color: topic.color, fontWeight: "bold", fontSize: "14px", minWidth: "20px" }}>{i + 1}.</span>
-                  <p style={{ margin: 0, color: "#c9d1d9", lineHeight: "1.7", fontSize: "14px" }}>{point}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {tab === "notes" && (
-            <div>
-              <div style={{
-                background: "#161b22",
-                border: "1px solid #30363d",
-                borderRadius: "10px",
-                padding: "20px",
-              }}>
-                {topic.notes.map((note, i) => (
-                  <div key={i} style={{
-                    display: "flex",
-                    gap: "10px",
-                    padding: "10px 0",
-                    borderBottom: i < topic.notes.length - 1 ? "1px solid #21262d" : "none",
-                  }}>
-                    <span style={{ color: topic.color, fontSize: "16px" }}>→</span>
-                    <p style={{ margin: 0, color: "#c9d1d9", lineHeight: "1.7", fontSize: "14px" }}>{note}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {tab === "code" && (
-            <div>
-              <div style={{
-                background: "#161b22",
-                border: "1px solid #30363d",
-                borderRadius: "10px",
-                overflow: "hidden",
-              }}>
-                <div style={{
-                  background: "#21262d",
-                  padding: "10px 16px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  borderBottom: "1px solid #30363d",
-                }}>
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57", display: "inline-block" }} />
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e", display: "inline-block" }} />
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840", display: "inline-block" }} />
-                  <span style={{ fontSize: "12px", color: "#8b949e", marginLeft: "8px" }}>example.jsx</span>
-                </div>
-                <pre style={{
-                  margin: 0,
-                  padding: "20px",
-                  overflowX: "auto",
-                  fontSize: "13px",
-                  lineHeight: "1.8",
-                  color: "#e6edf3",
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                }}>
-                  <code>{topic.code}</code>
-                </pre>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Navigation */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          padding: "20px 32px 32px",
-          gap: "12px",
-        }}>
-          <button
-            onClick={() => { setSelected(Math.max(0, selected - 1)); setTab("theory"); }}
-            disabled={selected === 0}
-            style={{
-              padding: "10px 20px",
-              borderRadius: "8px",
-              border: "1px solid #30363d",
-              background: selected === 0 ? "#161b22" : "#21262d",
-              color: selected === 0 ? "#484f58" : "#c9d1d9",
-              cursor: selected === 0 ? "not-allowed" : "pointer",
-              fontSize: "13px",
-              fontFamily: "inherit",
-            }}
-          >
-            ← Previous
-          </button>
-          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-            {topics.map((_, i) => (
-              <div
-                key={i}
-                onClick={() => { setSelected(i); setTab("theory"); }}
-                style={{
-                  width: selected === i ? "20px" : "8px",
-                  height: "8px",
-                  borderRadius: "4px",
-                  background: selected === i ? topic.color : "#30363d",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-              />
-            ))}
-          </div>
-          <button
-            onClick={() => { setSelected(Math.min(topics.length - 1, selected + 1)); setTab("theory"); }}
-            disabled={selected === topics.length - 1}
-            style={{
-              padding: "10px 20px",
-              borderRadius: "8px",
-              border: "1px solid #30363d",
-              background: selected === topics.length - 1 ? "#161b22" : "#21262d",
-              color: selected === topics.length - 1 ? "#484f58" : "#c9d1d9",
-              cursor: selected === topics.length - 1 ? "not-allowed" : "pointer",
-              fontSize: "13px",
-              fontFamily: "inherit",
-            }}
-          >
-            Next →
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Intermediate Notes (10–18) ───────────────────────────────────────────────
-export function IntermediateNotes() {
-  const [selected, setSelected] = useState(0);
-  const [tab, setTab] = useState("theory");
-  const topic = topics1018[selected];
-
-  return (
-    <div style={{
-      fontFamily: "'Fira Code', 'Courier New', monospace",
-      background: "#0d1117",
-      minHeight: "100vh",
-      display: "flex",
-      color: "#e6edf3",
-    }}>
-      {/* Sidebar */}
-      <div style={{
-        width: "220px", minWidth: "220px",
-        background: "#161b22",
-        borderRight: "1px solid #30363d",
-        overflowY: "auto",
-        padding: "16px 0",
-      }}>
-        <div style={{ padding: "0 16px 16px", borderBottom: "1px solid #30363d", marginBottom: "8px" }}>
-          <div style={{ fontSize: "11px", color: "#8b949e", letterSpacing: "2px", textTransform: "uppercase" }}>React Intermediate</div>
-          <div style={{ fontSize: "18px", fontWeight: "700", color: "#61DAFB", marginTop: "4px" }}>Topics 10–18</div>
-        </div>
-        {topics1018.map((t, i) => (
-          <button key={t.id} onClick={() => { setSelected(i); setTab("theory"); }} style={{
-            display: "flex", alignItems: "center", gap: "10px",
-            width: "100%", padding: "10px 16px",
-            background: selected === i ? "#21262d" : "transparent",
-            border: "none",
-            borderLeft: selected === i ? `3px solid ${t.color}` : "3px solid transparent",
-            color: selected === i ? "#e6edf3" : "#8b949e",
-            cursor: "pointer", textAlign: "left", fontSize: "12px", transition: "all 0.15s",
-          }}>
-            <span style={{ fontSize: "16px" }}>{t.emoji}</span>
-            <span style={{ lineHeight: "1.3" }}>{t.id}. {t.title}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Main Content */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
-        {/* Header */}
-        <div style={{
-          padding: "28px 32px 20px", borderBottom: "1px solid #30363d",
-          background: "#0d1117", position: "sticky", top: 0, zIndex: 10,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-            <span style={{ fontSize: "28px" }}>{topic.emoji}</span>
-            <div>
-              <span style={{ fontSize: "11px", color: "#8b949e", letterSpacing: "1px" }}>TOPIC {topic.id} OF 18</span>
-              <h1 style={{ margin: 0, fontSize: "22px", color: topic.color }}>{topic.title}</h1>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: "4px" }}>
-            {["theory", "notes", "code"].map((t) => (
-              <button key={t} onClick={() => setTab(t)} style={{
-                padding: "6px 16px", borderRadius: "6px", border: "1px solid",
-                borderColor: tab === t ? topic.color : "#30363d",
-                background: tab === t ? topic.color + "22" : "transparent",
-                color: tab === t ? topic.color : "#8b949e",
-                cursor: "pointer", fontSize: "12px", fontFamily: "inherit",
-                textTransform: "capitalize", letterSpacing: "0.5px",
-              }}>
-                {t === "theory" ? "📖 Theory" : t === "notes" ? "📌 Notes" : "💻 Code"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Content */}
-        <div style={{ padding: "28px 32px" }}>
-          {tab === "theory" && (
-            <div>
-              {topic.theory.map((point, i) => (
-                <div key={i} style={{
-                  display: "flex", gap: "14px", marginBottom: "16px",
-                  padding: "16px", background: "#161b22", borderRadius: "10px",
-                  border: "1px solid #30363d", borderLeft: `3px solid ${topic.color}`,
-                }}>
-                  <span style={{ color: topic.color, fontWeight: "bold", fontSize: "14px", minWidth: "20px" }}>{i + 1}.</span>
-                  <p style={{ margin: 0, color: "#c9d1d9", lineHeight: "1.7", fontSize: "14px" }}>{point}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {tab === "notes" && (
-            <div style={{ background: "#161b22", border: "1px solid #30363d", borderRadius: "10px", padding: "20px" }}>
-              {topic.notes.map((note, i) => (
-                <div key={i} style={{
-                  display: "flex", gap: "10px", padding: "10px 0",
-                  borderBottom: i < topic.notes.length - 1 ? "1px solid #21262d" : "none",
-                }}>
-                  <span style={{ color: topic.color, fontSize: "16px" }}>→</span>
-                  <p style={{ margin: 0, color: "#c9d1d9", lineHeight: "1.7", fontSize: "14px" }}>{note}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {tab === "code" && (
-            <div style={{ background: "#161b22", border: "1px solid #30363d", borderRadius: "10px", overflow: "hidden" }}>
-              <div style={{
-                background: "#21262d", padding: "10px 16px",
-                display: "flex", alignItems: "center", gap: "8px",
-                borderBottom: "1px solid #30363d",
-              }}>
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57", display: "inline-block" }} />
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e", display: "inline-block" }} />
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840", display: "inline-block" }} />
-                <span style={{ fontSize: "12px", color: "#8b949e", marginLeft: "8px" }}>example.jsx</span>
-              </div>
-              <pre style={{
-                margin: 0, padding: "20px", overflowX: "auto",
-                fontSize: "13px", lineHeight: "1.8", color: "#e6edf3",
-                whiteSpace: "pre-wrap", wordBreak: "break-word",
-              }}>
-                <code>{topic.code}</code>
-              </pre>
-            </div>
-          )}
-        </div>
-
-        {/* Navigation */}
-        <div style={{ display: "flex", justifyContent: "space-between", padding: "20px 32px 32px", gap: "12px" }}>
-          <button
-            onClick={() => { setSelected(Math.max(0, selected - 1)); setTab("theory"); }}
-            disabled={selected === 0}
-            style={{
-              padding: "10px 20px", borderRadius: "8px", border: "1px solid #30363d",
-              background: selected === 0 ? "#161b22" : "#21262d",
-              color: selected === 0 ? "#484f58" : "#c9d1d9",
-              cursor: selected === 0 ? "not-allowed" : "pointer",
-              fontSize: "13px", fontFamily: "inherit",
-            }}
-          >← Previous</button>
-
-          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-            {topics1018.map((_, i) => (
-              <div key={i} onClick={() => { setSelected(i); setTab("theory"); }} style={{
-                width: selected === i ? "20px" : "8px", height: "8px", borderRadius: "4px",
-                background: selected === i ? topic.color : "#30363d",
-                cursor: "pointer", transition: "all 0.2s",
-              }} />
-            ))}
-          </div>
-
-          <button
-            onClick={() => { setSelected(Math.min(topics1018.length - 1, selected + 1)); setTab("theory"); }}
-            disabled={selected === topics1018.length - 1}
-            style={{
-              padding: "10px 20px", borderRadius: "8px", border: "1px solid #30363d",
-              background: selected === topics1018.length - 1 ? "#161b22" : "#21262d",
-              color: selected === topics1018.length - 1 ? "#484f58" : "#c9d1d9",
-              cursor: selected === topics1018.length - 1 ? "not-allowed" : "pointer",
-              fontSize: "13px", fontFamily: "inherit",
-            }}
-          >Next →</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Advanced Notes (19–30) ───────────────────────────────────────────────────
-export function AdvancedNotes() {
-  const [selected, setSelected] = useState(0);
-  const [tab, setTab] = useState("theory");
-  const topic = topics1930[selected];
-
-  return (
-    <div style={{
-      fontFamily: "'Fira Code', 'Courier New', monospace",
-      background: "#0d1117", minHeight: "100vh",
-      display: "flex", color: "#e6edf3",
-    }}>
-      <div style={{
-        width: "220px", minWidth: "220px", background: "#161b22",
-        borderRight: "1px solid #30363d", overflowY: "auto", padding: "16px 0",
-      }}>
-        <div style={{ padding: "0 16px 16px", borderBottom: "1px solid #30363d", marginBottom: "8px" }}>
-          <div style={{ fontSize: "11px", color: "#8b949e", letterSpacing: "2px", textTransform: "uppercase" }}>React Advanced</div>
-          <div style={{ fontSize: "18px", fontWeight: "700", color: "#61DAFB", marginTop: "4px" }}>Topics 19–30</div>
-        </div>
-        {topics1930.map((t, i) => (
-          <button key={t.id} onClick={() => { setSelected(i); setTab("theory"); }} style={{
-            display: "flex", alignItems: "center", gap: "10px",
-            width: "100%", padding: "10px 16px",
-            background: selected === i ? "#21262d" : "transparent",
-            border: "none",
-            borderLeft: selected === i ? `3px solid ${t.color}` : "3px solid transparent",
-            color: selected === i ? "#e6edf3" : "#8b949e",
-            cursor: "pointer", textAlign: "left", fontSize: "12px", transition: "all 0.15s",
-          }}>
-            <span style={{ fontSize: "16px" }}>{t.emoji}</span>
-            <span style={{ lineHeight: "1.3" }}>{t.id}. {t.title}</span>
-          </button>
-        ))}
-      </div>
-
-      <div style={{ flex: 1, overflowY: "auto" }}>
-        <div style={{
-          padding: "28px 32px 20px", borderBottom: "1px solid #30363d",
-          background: "#0d1117", position: "sticky", top: 0, zIndex: 10,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-            <span style={{ fontSize: "28px" }}>{topic.emoji}</span>
-            <div>
-              <span style={{ fontSize: "11px", color: "#8b949e", letterSpacing: "1px" }}>TOPIC {topic.id} OF 30</span>
-              <h1 style={{ margin: 0, fontSize: "22px", color: topic.color }}>{topic.title}</h1>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: "4px" }}>
-            {["theory", "notes", "code"].map((t) => (
-              <button key={t} onClick={() => setTab(t)} style={{
-                padding: "6px 16px", borderRadius: "6px", border: "1px solid",
-                borderColor: tab === t ? topic.color : "#30363d",
-                background: tab === t ? topic.color + "22" : "transparent",
-                color: tab === t ? topic.color : "#8b949e",
-                cursor: "pointer", fontSize: "12px", fontFamily: "inherit",
-                textTransform: "capitalize", letterSpacing: "0.5px",
-              }}>
-                {t === "theory" ? "📖 Theory" : t === "notes" ? "📌 Notes" : "💻 Code"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ padding: "28px 32px" }}>
-          {tab === "theory" && (
-            <div>
-              {topic.theory.map((point, i) => (
-                <div key={i} style={{
-                  display: "flex", gap: "14px", marginBottom: "16px",
-                  padding: "16px", background: "#161b22", borderRadius: "10px",
-                  border: "1px solid #30363d", borderLeft: `3px solid ${topic.color}`,
-                }}>
-                  <span style={{ color: topic.color, fontWeight: "bold", fontSize: "14px", minWidth: "20px" }}>{i + 1}.</span>
-                  <p style={{ margin: 0, color: "#c9d1d9", lineHeight: "1.7", fontSize: "14px" }}>{point}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {tab === "notes" && (
-            <div style={{ background: "#161b22", border: "1px solid #30363d", borderRadius: "10px", padding: "20px" }}>
-              {topic.notes.map((note, i) => (
-                <div key={i} style={{
-                  display: "flex", gap: "10px", padding: "10px 0",
-                  borderBottom: i < topic.notes.length - 1 ? "1px solid #21262d" : "none",
-                }}>
-                  <span style={{ color: topic.color, fontSize: "16px" }}>→</span>
-                  <p style={{ margin: 0, color: "#c9d1d9", lineHeight: "1.7", fontSize: "14px" }}>{note}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {tab === "code" && (
-            <div style={{ background: "#161b22", border: "1px solid #30363d", borderRadius: "10px", overflow: "hidden" }}>
-              <div style={{
-                background: "#21262d", padding: "10px 16px",
-                display: "flex", alignItems: "center", gap: "8px",
-                borderBottom: "1px solid #30363d",
-              }}>
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57", display: "inline-block" }} />
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e", display: "inline-block" }} />
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840", display: "inline-block" }} />
-                <span style={{ fontSize: "12px", color: "#8b949e", marginLeft: "8px" }}>example.jsx</span>
-              </div>
-              <pre style={{
-                margin: 0, padding: "20px", overflowX: "auto",
-                fontSize: "13px", lineHeight: "1.8", color: "#e6edf3",
-                whiteSpace: "pre-wrap", wordBreak: "break-word",
-              }}>
-                <code>{topic.code}</code>
-              </pre>
-            </div>
-          )}
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "space-between", padding: "20px 32px 32px", gap: "12px" }}>
-          <button
-            onClick={() => { setSelected(Math.max(0, selected - 1)); setTab("theory"); }}
-            disabled={selected === 0}
-            style={{
-              padding: "10px 20px", borderRadius: "8px", border: "1px solid #30363d",
-              background: selected === 0 ? "#161b22" : "#21262d",
-              color: selected === 0 ? "#484f58" : "#c9d1d9",
-              cursor: selected === 0 ? "not-allowed" : "pointer",
-              fontSize: "13px", fontFamily: "inherit",
-            }}
-          >← Previous</button>
-
-          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-            {topics1930.map((_, i) => (
-              <div key={i} onClick={() => { setSelected(i); setTab("theory"); }} style={{
-                width: selected === i ? "20px" : "8px", height: "8px", borderRadius: "4px",
-                background: selected === i ? topic.color : "#30363d",
-                cursor: "pointer", transition: "all 0.2s",
-              }} />
-            ))}
-          </div>
-
-          <button
-            onClick={() => { setSelected(Math.min(topics1930.length - 1, selected + 1)); setTab("theory"); }}
-            disabled={selected === topics1930.length - 1}
-            style={{
-              padding: "10px 20px", borderRadius: "8px", border: "1px solid #30363d",
-              background: selected === topics1930.length - 1 ? "#161b22" : "#21262d",
-              color: selected === topics1930.length - 1 ? "#484f58" : "#c9d1d9",
-              cursor: selected === topics1930.length - 1 ? "not-allowed" : "pointer",
-              fontSize: "13px", fontFamily: "inherit",
-            }}
-          >Next →</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Interview Definitions ────────────────────────────────────────────────────
-export function InterviewDefs() {
-  const [activeCat, setActiveCat] = useState(0);
+// ─── Interview Definitions ─────────────────────────────────────────────────────
+function InterviewDefs() {
+  const [activeCat,  setActiveCat]  = useState(0);
   const [activeTerm, setActiveTerm] = useState(0);
-  const [showTip, setShowTip] = useState(false);
+  const [showTip,    setShowTip]    = useState(false);
 
   const cat  = interviewCategories[activeCat];
   const item = cat.terms[activeTerm];
 
-  function goToTerm(idx) {
-    setActiveTerm(idx);
-    setShowTip(false);
-  }
+  function goToTerm(idx) { setActiveTerm(idx); setShowTip(false); }
 
   function nextTerm() {
-    if (activeTerm < cat.terms.length - 1) {
-      goToTerm(activeTerm + 1);
-    } else if (activeCat < interviewCategories.length - 1) {
-      setActiveCat(activeCat + 1);
-      setActiveTerm(0);
-      setShowTip(false);
-    }
+    if (activeTerm < cat.terms.length - 1) { goToTerm(activeTerm + 1); }
+    else if (activeCat < interviewCategories.length - 1) { setActiveCat(activeCat + 1); setActiveTerm(0); setShowTip(false); }
   }
 
   function prevTerm() {
-    if (activeTerm > 0) {
-      goToTerm(activeTerm - 1);
-    } else if (activeCat > 0) {
-      const prevCat = activeCat - 1;
-      setActiveCat(prevCat);
-      setActiveTerm(categories[prevCat].terms.length - 1);
-      setShowTip(false);
+    if (activeTerm > 0) { goToTerm(activeTerm - 1); }
+    else if (activeCat > 0) {
+      const p = activeCat - 1;
+      setActiveCat(p); setActiveTerm(interviewCategories[p].terms.length - 1); setShowTip(false);
     }
   }
 
-  const totalTerms   = categories.reduce((s, c) => s + c.terms.length, 0);
-  const termsBeforeCat = categories.slice(0, activeCat).reduce((s, c) => s + c.terms.length, 0);
-  const globalIndex  = termsBeforeCat + activeTerm + 1;
+  const totalTerms     = interviewCategories.reduce((s, c) => s + c.terms.length, 0);
+  const termsBeforeCat = interviewCategories.slice(0, activeCat).reduce((s, c) => s + c.terms.length, 0);
+  const globalIndex    = termsBeforeCat + activeTerm + 1;
 
   return (
-    <div style={{
-      fontFamily: "'Fira Code', 'Courier New', monospace",
-      background: "#0d1117", minHeight: "100vh",
-      display: "flex", flexDirection: "column",
-      color: "#e6edf3",
-    }}>
+    <div style={{ fontFamily:"'Fira Code','Courier New',monospace", background:"#0d1117", minHeight:"100vh", display:"flex", flexDirection:"column", color:"#e6edf3" }}>
       {/* Top bar */}
-      <div style={{
-        background: "#161b22", borderBottom: "1px solid #30363d",
-        padding: "12px 24px", display: "flex", alignItems: "center",
-        gap: 16, flexWrap: "wrap",
-      }}>
+      <div style={{ background:"#161b22", borderBottom:"1px solid #30363d", padding:"12px 24px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap" }}>
         <div>
-          <div style={{ fontSize: "11px", color: "#8b949e", letterSpacing: "2px", textTransform: "uppercase" }}>React Interview</div>
-          <div style={{ fontSize: "16px", fontWeight: "700", color: "#61DAFB" }}>All Definitions</div>
+          <div style={{ fontSize:"11px", color:"#8b949e", letterSpacing:"2px", textTransform:"uppercase" }}>Express.js Interview</div>
+          <div style={{ fontSize:"16px", fontWeight:"700", color:"#61DAFB" }}>All Definitions</div>
         </div>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <div style={{ marginLeft:"auto", display:"flex", gap:8, flexWrap:"wrap" }}>
           {interviewCategories.map((c, i) => (
             <button key={i} onClick={() => { setActiveCat(i); setActiveTerm(0); setShowTip(false); }} style={{
-              padding: "5px 12px", borderRadius: 20, border: "1px solid",
-              borderColor: activeCat === i ? c.color : "#30363d",
-              background: activeCat === i ? c.color + "22" : "transparent",
-              color: activeCat === i ? c.color : "#8b949e",
-              cursor: "pointer", fontSize: "11px", fontFamily: "inherit",
+              padding:"5px 12px", borderRadius:20, border:"1px solid",
+              borderColor: activeCat===i ? c.color : "#30363d",
+              background:  activeCat===i ? c.color+"22" : "transparent",
+              color:       activeCat===i ? c.color : "#8b949e",
+              cursor:"pointer", fontSize:"11px", fontFamily:"inherit",
             }}>
               {c.emoji} {c.label}
             </button>
@@ -3196,20 +1676,16 @@ export function InterviewDefs() {
         </div>
       </div>
 
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+      <div style={{ display:"flex", flex:1, overflow:"hidden" }}>
         {/* Sidebar */}
-        <div style={{
-          width: "200px", minWidth: "200px", background: "#161b22",
-          borderRight: "1px solid #30363d", overflowY: "auto", padding: "8px 0",
-        }}>
+        <div style={{ width:"200px", minWidth:"200px", background:"#161b22", borderRight:"1px solid #30363d", overflowY:"auto", padding:"8px 0" }}>
           {cat.terms.map((t, i) => (
             <button key={i} onClick={() => goToTerm(i)} style={{
-              display: "block", width: "100%", padding: "9px 14px",
-              background: activeTerm === i ? "#21262d" : "transparent",
-              border: "none",
-              borderLeft: activeTerm === i ? `3px solid ${cat.color}` : "3px solid transparent",
-              color: activeTerm === i ? "#e6edf3" : "#8b949e",
-              cursor: "pointer", textAlign: "left", fontSize: "12px",
+              display:"block", width:"100%", padding:"9px 14px",
+              background: activeTerm===i ? "#21262d" : "transparent",
+              border:"none", borderLeft: activeTerm===i ? `3px solid ${cat.color}` : "3px solid transparent",
+              color: activeTerm===i ? "#e6edf3" : "#8b949e",
+              cursor:"pointer", textAlign:"left", fontSize:"12px",
             }}>
               {t.term}
             </button>
@@ -3217,118 +1693,60 @@ export function InterviewDefs() {
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px" }}>
+        <div style={{ flex:1, overflowY:"auto", padding:"28px 32px" }}>
           {/* Progress */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-            <span style={{ fontSize: "11px", color: "#8b949e" }}>{globalIndex} / {totalTerms}</span>
-            <div style={{ flex: 1, height: 4, background: "#21262d", borderRadius: 2 }}>
-              <div style={{
-                height: 4, borderRadius: 2,
-                background: cat.color,
-                width: `${(globalIndex / totalTerms) * 100}%`,
-                transition: "width 0.3s",
-              }} />
+          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:20 }}>
+            <span style={{ fontSize:"11px", color:"#8b949e" }}>{globalIndex} / {totalTerms}</span>
+            <div style={{ flex:1, height:4, background:"#21262d", borderRadius:2 }}>
+              <div style={{ height:4, borderRadius:2, background:cat.color, width:`${(globalIndex/totalTerms)*100}%`, transition:"width 0.3s" }} />
             </div>
-            <span style={{ fontSize: "11px", color: cat.color }}>{cat.label}</span>
+            <span style={{ fontSize:"11px", color:cat.color }}>{cat.label}</span>
           </div>
 
           {/* Term card */}
-          <div style={{
-            background: "#161b22", border: "1px solid #30363d",
-            borderRadius: 12, padding: "24px 28px", marginBottom: 16,
-            borderTop: `3px solid ${cat.color}`,
-          }}>
-            <h2 style={{ margin: "0 0 20px", fontSize: "24px", color: cat.color }}>{item.term}</h2>
+          <div style={{ background:"#161b22", border:"1px solid #30363d", borderRadius:12, padding:"24px 28px", marginBottom:16, borderTop:`3px solid ${cat.color}` }}>
+            <h2 style={{ margin:"0 0 20px", fontSize:"24px", color:cat.color }}>{item.term}</h2>
 
-            {/* Simple */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{
-                fontSize: "10px", letterSpacing: "2px", color: "#8b949e",
-                textTransform: "uppercase", marginBottom: 8,
-              }}>
+            <div style={{ marginBottom:20 }}>
+              <div style={{ fontSize:"10px", letterSpacing:"2px", color:"#8b949e", textTransform:"uppercase", marginBottom:8 }}>
                 🗣️ Simple Answer (1 sentence)
               </div>
-              <p style={{
-                margin: 0, color: "#c9d1d9", lineHeight: 1.7, fontSize: "14px",
-                padding: "12px 16px", background: "#0d1117",
-                borderRadius: 8, borderLeft: `3px solid ${cat.color}`,
-              }}>
+              <p style={{ margin:0, color:"#c9d1d9", lineHeight:1.7, fontSize:"14px", padding:"12px 16px", background:"#0d1117", borderRadius:8, borderLeft:`3px solid ${cat.color}` }}>
                 {item.simple}
               </p>
             </div>
 
-            {/* Technical */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{
-                fontSize: "10px", letterSpacing: "2px", color: "#8b949e",
-                textTransform: "uppercase", marginBottom: 8,
-              }}>
+            <div style={{ marginBottom:20 }}>
+              <div style={{ fontSize:"10px", letterSpacing:"2px", color:"#8b949e", textTransform:"uppercase", marginBottom:8 }}>
                 💻 Technical Answer (for experienced interviewers)
               </div>
-              <p style={{
-                margin: 0, color: "#c9d1d9", lineHeight: 1.7, fontSize: "14px",
-                padding: "12px 16px", background: "#0d1117",
-                borderRadius: 8, borderLeft: "3px solid #30363d",
-              }}>
+              <p style={{ margin:0, color:"#c9d1d9", lineHeight:1.7, fontSize:"14px", padding:"12px 16px", background:"#0d1117", borderRadius:8, borderLeft:"3px solid #30363d" }}>
                 {item.technical}
               </p>
             </div>
 
-            {/* Tip toggle */}
-            <button onClick={() => setShowTip(!showTip)} style={{
-              padding: "8px 16px", borderRadius: 8,
-              border: `1px solid ${showTip ? "#FBBF24" : "#30363d"}`,
-              background: showTip ? "#FBBF2422" : "transparent",
-              color: showTip ? "#FBBF24" : "#8b949e",
-              cursor: "pointer", fontSize: "12px", fontFamily: "inherit",
-            }}>
+            <button onClick={() => setShowTip(!showTip)} style={{ padding:"8px 16px", borderRadius:8, border:`1px solid ${showTip?"#FBBF24":"#30363d"}`, background: showTip?"#FBBF2422":"transparent", color: showTip?"#FBBF24":"#8b949e", cursor:"pointer", fontSize:"12px", fontFamily:"inherit" }}>
               {showTip ? "Hide" : "Show"} Interview Tip 💡
             </button>
 
             {showTip && (
-              <div style={{
-                marginTop: 12, padding: "12px 16px",
-                background: "#FBBF2411", border: "1px solid #FBBF2444",
-                borderRadius: 8, color: "#FBBF24",
-                fontSize: "13px", lineHeight: 1.7,
-              }}>
+              <div style={{ marginTop:12, padding:"12px 16px", background:"#FBBF2411", border:"1px solid #FBBF2444", borderRadius:8, color:"#FBBF24", fontSize:"13px", lineHeight:1.7 }}>
                 💡 {item.tip}
               </div>
             )}
           </div>
 
           {/* Navigation */}
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-            <button onClick={prevTerm}
-              disabled={activeCat === 0 && activeTerm === 0}
-              style={{
-                padding: "10px 20px", borderRadius: 8, border: "1px solid #30363d",
-                background: "#21262d", color: "#c9d1d9",
-                cursor: "pointer", fontSize: "13px", fontFamily: "inherit",
-                opacity: activeCat === 0 && activeTerm === 0 ? 0.4 : 1,
-              }}>
+          <div style={{ display:"flex", justifyContent:"space-between", gap:12 }}>
+            <button onClick={prevTerm} disabled={activeCat===0 && activeTerm===0} style={{ padding:"10px 20px", borderRadius:8, border:"1px solid #30363d", background:"#21262d", color:"#c9d1d9", cursor:"pointer", fontSize:"13px", fontFamily:"inherit", opacity: activeCat===0 && activeTerm===0 ? 0.4 : 1 }}>
               ← Previous
             </button>
-
-            <div style={{ display: "flex", gap: 5, alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
-              {cat.terms.map((_, i) => (
-                <div key={i} onClick={() => goToTerm(i)} style={{
-                  width: activeTerm === i ? 18 : 7, height: 7,
-                  borderRadius: 4,
-                  background: activeTerm === i ? cat.color : "#30363d",
-                  cursor: "pointer", transition: "all 0.2s",
-                }} />
+            <div style={{ display:"flex", gap:5, alignItems:"center", flexWrap:"wrap", justifyContent:"center" }}>
+              {cat.terms.map((_,i) => (
+                <div key={i} onClick={() => goToTerm(i)} style={{ width: activeTerm===i?18:7, height:7, borderRadius:4, background: activeTerm===i?cat.color:"#30363d", cursor:"pointer", transition:"all 0.2s" }} />
               ))}
             </div>
-
-            <button onClick={nextTerm}
-              disabled={activeCat === interviewCategories.length - 1 && activeTerm === cat.terms.length - 1}
-              style={{
-                padding: "10px 20px", borderRadius: 8, border: "1px solid #30363d",
-                background: "#21262d", color: "#c9d1d9",
-                cursor: "pointer", fontSize: "13px", fontFamily: "inherit",
-                opacity: activeCat === interviewCategories.length - 1 && activeTerm === cat.terms.length - 1 ? 0.4 : 1,
-              }}>
+            <button onClick={nextTerm} disabled={activeCat===interviewCategories.length-1 && activeTerm===cat.terms.length-1} style={{ padding:"10px 20px", borderRadius:8, border:"1px solid #30363d", background:"#21262d", color:"#c9d1d9", cursor:"pointer", fontSize:"13px", fontFamily:"inherit", opacity: activeCat===interviewCategories.length-1 && activeTerm===cat.terms.length-1 ? 0.4 : 1 }}>
               Next →
             </button>
           </div>
@@ -3338,18 +1756,79 @@ export function InterviewDefs() {
   );
 }
 
-// ─── App with Router ──────────────────────────────────────────────────────────
+// ─── Home ──────────────────────────────────────────────────────────────────────
+function Home() {
+  const cards = [
+    { label:"⚡ Quick Review",       path:"/quick-review",    desc:"All 18 topics at a glance — read in ~10 min" },
+    { label:"🟢 Basics 1–6",         path:"/basic",           desc:"Server, Routing, req, res, Middleware, Body Parsing" },
+    { label:"🟡 Intermediate 7–12",  path:"/intermediate",    desc:"Router, Error Handling, Env Vars, CORS, Static, REST" },
+    { label:"🔴 Advanced 13–18",     path:"/advanced",        desc:"JWT Auth, MongoDB, Validation, Async, Structure, Deploy" },
+    { label:"🎯 Interview Defs",     path:"/interview",       desc:"25 key Express terms — simple + technical + tip" },
+  ];
+  return (
+    <main style={{ maxWidth:900, margin:"3rem auto", padding:"0 1.5rem", fontFamily:"'Fira Code',monospace" }}>
+      <h1 style={{ fontSize:"2rem", color:"#e6edf3", marginBottom:".4rem" }}>🚂 Express.js Study Notes</h1>
+      <p style={{ color:"#8b949e", marginBottom:"2.5rem" }}>18 topics · 5 sections · full interview prep</p>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))", gap:"1rem" }}>
+        {cards.map(({ label, path, desc }) => (
+          <Link key={path} to={path} style={{ display:"flex", flexDirection:"column", gap:8, background:"#161b22", border:"1px solid #30363d", borderRadius:10, padding:"1.2rem 1.4rem", color:"#e6edf3", textDecoration:"none", transition:"border-color .2s" }}>
+            <span style={{ fontWeight:700, fontSize:"0.9rem" }}>{label}</span>
+            <span style={{ color:"#8b949e", fontSize:"0.78rem", lineHeight:1.5 }}>{desc}</span>
+            <span style={{ color:"#61DAFB", fontSize:"1.1rem", alignSelf:"flex-end" }}>→</span>
+          </Link>
+        ))}
+      </div>
+    </main>
+  );
+}
+
+// ─── Navbar ────────────────────────────────────────────────────────────────────
+const NAV = [
+  { label:"🏠 Home",             path:"/" },
+  { label:"⚡ Quick Review",     path:"/quick-review" },
+  { label:"🟢 Basics 1–6",       path:"/basic" },
+  { label:"🟡 Intermediate 7–12",path:"/intermediate" },
+  { label:"🔴 Advanced 13–18",   path:"/advanced" },
+  { label:"🎯 Interview Defs",   path:"/interview" },
+];
+
+function Navbar() {
+  const loc = useLocation();
+  return (
+    <nav style={{ position:"sticky", top:0, zIndex:200, background:"#161b22", borderBottom:"1px solid #30363d" }}>
+      <div style={{ maxWidth:1200, margin:"0 auto", padding:"0 1rem", height:56, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <Link to="/" style={{ color:"#61DAFB", textDecoration:"none", fontWeight:700, fontSize:"1.05rem", fontFamily:"'Fira Code',monospace" }}>
+          🚂 ExpressNotes
+        </Link>
+        <div style={{ display:"flex", alignItems:"center", gap:"2px", flexWrap:"wrap" }}>
+          {NAV.map(({ label, path }) => (
+            <Link key={path} to={path} style={{
+              color: loc.pathname===path ? "#61DAFB" : "#8b949e",
+              textDecoration:"none", padding:"5px 10px", borderRadius:6,
+              background: loc.pathname===path ? "#21262d" : "transparent",
+              fontSize:"11px", transition:"all 0.15s", fontFamily:"'Fira Code',monospace",
+            }}>
+              {label}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+// ─── App ───────────────────────────────────────────────────────────────────────
 export default function App() {
   return (
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/"            element={<Home />} />
+        <Route path="/"             element={<Home />} />
         <Route path="/quick-review" element={<QuickReview />} />
-        <Route path="/basic"       element={<BasicNotes />} />
-        <Route path="/intermediate" element={<IntermediateNotes />} />
-        <Route path="/advanced"    element={<AdvancedNotes />} />
-        <Route path="/interview"   element={<InterviewDefs />} />
+        <Route path="/basic"        element={<TopicViewer topicList={topicsBasic}        sectionLabel="Express Basics"        topicRange="1–6"  />} />
+        <Route path="/intermediate" element={<TopicViewer topicList={topicsIntermediate} sectionLabel="Express Intermediate"  topicRange="7–12" />} />
+        <Route path="/advanced"     element={<TopicViewer topicList={topicsAdvanced}     sectionLabel="Express Advanced"      topicRange="13–18"/>} />
+        <Route path="/interview"    element={<InterviewDefs />} />
       </Routes>
     </Router>
   );
